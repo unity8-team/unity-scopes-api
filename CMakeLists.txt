@@ -176,8 +176,8 @@ set(SCOPES_DEFAULT_CONFIGDIR ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT})
 
 # API version
 set(UNITY_SCOPES_MAJOR 0)
-set(UNITY_SCOPES_MINOR 3)
-set(UNITY_SCOPES_MICRO 2)
+set(UNITY_SCOPES_MINOR 4)
+set(UNITY_SCOPES_MICRO 0)
 
 # Scopes library
 set(UNITY_SCOPES_LIB unity-scopes)
@@ -380,6 +380,7 @@ else()
     else()
       configure_file(${PROJECT_SOURCE_DIR}/doc/Doxyfile.in ${PROJECT_BINARY_DIR}/doc/Doxyfile @ONLY IMMEDIATE)
     endif()
+    configure_file(${PROJECT_SOURCE_DIR}/doc/index.html ${PROJECT_BINARY_DIR}/doc/index.html COPYONLY)
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/doc/${PROJECT}/index.html
                        COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/doc/Doxyfile
                        DEPENDS ${PROJECT_BINARY_DIR}/doc/Doxyfile
