@@ -23,6 +23,7 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/FilterStateImpl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/JsonCppNode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/LinkImpl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Logging.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/MiddlewareBase.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/MiddlewareFactory.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/MWObject.cpp
