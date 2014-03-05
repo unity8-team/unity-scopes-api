@@ -34,9 +34,17 @@ LogStream::LogStream() {
 
 }
 
-LogGatherer LogStream::operator<<(const std::string &s) {
+LogGatherer LogStream::operator<<(const std::string &s)
+{
     LogGatherer l;
     l << s;
+    return l;
+}
+
+LogGatherer LogStream::operator<<(const int i)
+{
+    LogGatherer l;
+    l << i;
     return l;
 }
 
@@ -69,6 +77,11 @@ LogGatherer& LogGatherer::operator<<(const std::string &s)
 {
     strings.push_back(s);
     return *this;
+}
+
+LogGatherer& LogGatherer::operator<<(const int i)
+{
+    return *this << std::to_string(i);
 }
 
 } // namespace internal

@@ -45,6 +45,7 @@ TEST_F(LoggingTest, basic)
     errlog << "First message to stderr.";
     errlog << msg;
     errlog << "Piecewise " << "message " << "to stderr\n";
+    errlog << 1 << " is the loneliest number. Not " << 2 << ".\n";
 }
 
 
