@@ -20,6 +20,8 @@
 #define UNITY_SCOPES_INTERNAL_LOGGING_H
 
 #include <string>
+#include <vector>
+#include <unity/util/NonCopyable.h>
 
 namespace unity
 {
@@ -30,7 +32,28 @@ namespace scopes
 namespace internal
 {
 
-class LoggingPlaceholder;
+class LogGatherer;
+
+class LogStream final {
+    NONCOPYABLE(LogStream);
+public:
+    LogStream();
+    LogGatherer operator<<(const std::string &s);
+};
+
+class LogGatherer final {
+
+public:
+
+    LogGatherer();
+    ~LogGatherer();
+    LogGatherer& operator<<(const std::string &s);
+
+private:
+    std::vector<std::string> strings;
+};
+
+extern LogStream errlog;
 
 } // namespace internal
 
