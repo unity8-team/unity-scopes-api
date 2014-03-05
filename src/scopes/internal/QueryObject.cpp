@@ -18,6 +18,7 @@
 
 #include <unity/scopes/internal/QueryObject.h>
 
+#include <unity/scopes/internal/Logging.h>
 #include <unity/scopes/internal/MWQueryCtrl.h>
 #include <unity/scopes/internal/MWReply.h>
 #include <unity/scopes/internal/QueryCtrlObject.h>
@@ -30,7 +31,6 @@
 #include <unity/scopes/SearchQuery.h>
 #include <unity/Exception.h>
 
-#include <iostream>
 #include <cassert>
 
 using namespace std;
@@ -117,14 +117,14 @@ void QueryObject::run(MWReplyProxy const& reply, InvokeInfo const& /* info */) n
         pushable_ = false;
         // TODO: log error
         reply_->finished(ListenerBase::Error, e.what());     // Oneway, can't block
-        cerr << "ScopeBase::run(): " << e.what() << endl;
+        errlog << "ScopeBase::run(): " << e.what();
     }
     catch (...)
     {
         pushable_ = false;
         // TODO: log error
         reply_->finished(ListenerBase::Error, "unknown exception");     // Oneway, can't block
-        cerr << "ScopeBase::run(): unknown exception" << endl;
+        errlog << "ScopeBase::run(): unknown exception";
     }
 }
 

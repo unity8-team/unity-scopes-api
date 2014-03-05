@@ -17,12 +17,12 @@
  */
 
 #include <unity/scopes/internal/QueryBaseImpl.h>
+#include <unity/scopes/internal/Logging.h>
 
 #include <unity/scopes/QueryCtrl.h>
 #include <unity/scopes/Scope.h>
 #include <unity/scopes/SearchMetadata.h>
 
-#include <iostream>
 #include <cassert>
 
 using namespace std;
@@ -105,7 +105,7 @@ void QueryBaseImpl::set_metadata(QueryMetadata const& metadata)
     catch (std::bad_cast const& e) // this shouldn't really happen, if it does, that's a bug
     {
         // TODO: log this
-        std::cerr << "QueryBaseImpl()::set_metadata(): " << e.what() << std::endl;
+        errlog << "QueryBaseImpl()::set_metadata(): " << e.what();
         throw;
     }
 }

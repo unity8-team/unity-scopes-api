@@ -18,6 +18,7 @@
 
 #include <unity/scopes/internal/QueryCtrlImpl.h>
 
+#include <unity/scopes/internal/Logging.h>
 #include <unity/scopes/internal/MiddlewareBase.h>
 #include <unity/scopes/internal/MWQueryCtrl.h>
 #include <unity/scopes/internal/MWReply.h>
@@ -26,7 +27,6 @@
 #include <unity/scopes/ScopeExceptions.h>
 
 #include <cassert>
-#include <iostream> // TODO: remove this once logging is added
 
 using namespace std;
 
@@ -67,7 +67,7 @@ void QueryCtrlImpl::cancel()
     }
     catch (std::exception const& e)
     {
-        cerr << e.what() << endl;
+        errlog << e.what();
         // TODO: log error
     }
 }

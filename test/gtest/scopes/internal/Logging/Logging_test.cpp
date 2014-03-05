@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Canonical Ltd.
+ * Copyright © 2014 Canonical Ltd.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3,
@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Authored by: Marcus Tomlinson <marcus.tomlinson@canonical.com>
+ * Authored by: Jussi Pakkanen <jussi.pakkanen@canonical.com>
  */
 
 #include <unity/scopes/internal/Logging.h>
@@ -44,7 +44,7 @@ TEST_F(LoggingTest, basic)
     std::string msg("Second message to stderr.");
     errlog << "First message to stderr.";
     errlog << msg;
-    errlog << "Piecewise " << "message " << "to stderr\n";
+    errlog << "Piecewise " << "message " << "to stderr.\n";
     errlog << 1 << " is the loneliest number. Not " << 2 << ".\n";
 }
 

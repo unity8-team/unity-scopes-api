@@ -18,6 +18,7 @@
 
 #include <unity/scopes/internal/ScopeImpl.h>
 
+#include <unity/scopes/internal/Logging.h>
 #include <unity/scopes/internal/ResultImpl.h>
 #include <unity/scopes/internal/MiddlewareBase.h>
 #include <unity/scopes/internal/MWScope.h>
@@ -33,7 +34,6 @@
 #include <unity/scopes/internal/PreviewReplyObject.h>
 
 #include <cassert>
-#include <iostream> // TODO: remove this once logging is added
 
 using namespace std;
 
@@ -134,7 +134,7 @@ QueryCtrlProxy ScopeImpl::activate(Result const& result, ActionMetadata const& m
     catch (std::exception const& e)
     {
         // TODO: log error
-        cerr << "activate(): " << e.what() << endl;
+        errlog << "activate(): " << e.what();
         try
         {
             ro->finished(ListenerBase::Error, e.what());
@@ -142,7 +142,7 @@ QueryCtrlProxy ScopeImpl::activate(Result const& result, ActionMetadata const& m
         }
         catch (...)
         {
-            cerr << "activate(): unknown exception" << endl;
+            errlog << "activate(): unknown exception";
         }
         throw;
     }
@@ -171,7 +171,7 @@ QueryCtrlProxy ScopeImpl::perform_action(Result const& result, ActionMetadata co
     catch (std::exception const& e)
     {
         // TODO: log error
-        cerr << "perform_action(): " << e.what() << endl;
+        errlog << "perform_action(): " << e.what();
         try
         {
             // TODO: if things go wrong, we need to make sure that the reply object
@@ -181,7 +181,7 @@ QueryCtrlProxy ScopeImpl::perform_action(Result const& result, ActionMetadata co
         }
         catch (...)
         {
-            cerr << "perform_action(): unknown exception" << endl;
+            errlog << "perform_action(): unknown exception";
         }
         throw;
     }
@@ -215,7 +215,7 @@ QueryCtrlProxy ScopeImpl::preview(Result const& result, ActionMetadata const& hi
     catch (std::exception const& e)
     {
         // TODO: log error
-        cerr << "preview(): " << e.what() << endl;
+        errlog << "preview(): " << e.what();
         try
         {
             ro->finished(ListenerBase::Error, e.what());
@@ -223,7 +223,7 @@ QueryCtrlProxy ScopeImpl::preview(Result const& result, ActionMetadata const& hi
         }
         catch (...)
         {
-            cerr << "preview(): unknown exception" << endl;
+            errlog << "preview(): unknown exception";
         }
         throw;
     }

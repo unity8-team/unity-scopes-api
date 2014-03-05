@@ -16,6 +16,7 @@
  * Authored by: Michi Henning <michi.henning@canonical.com>
  */
 
+#include <unity/scopes/internal/Logging.h>
 #include <unity/scopes/internal/ReplyObject.h>
 #include <unity/scopes/internal/ResultReplyObject.h>
 #include <unity/scopes/internal/PreviewReplyObject.h>
@@ -27,7 +28,6 @@
 #include <unity/scopes/internal/CategorisedResultImpl.h>
 
 #include <cassert>
-#include <iostream> // TODO: remove this once logging is added
 
 using namespace std;
 using namespace unity::scopes::internal;
@@ -50,8 +50,8 @@ ReplyObject::ReplyObject(ListenerBase::SPtr const& receiver_base, RuntimeImpl co
     assert(receiver_base);
     assert(runtime);
     reap_item_ = runtime->reply_reaper()->add([this] {
-        cerr << "No activity on ReplyObject for scope " << this->origin_proxy_
-             << ": ReplyObject destroyed" << endl;
+        errlog << "No activity on ReplyObject for scope " << this->origin_proxy_
+               << ": ReplyObject destroyed";
         this->disconnect();
     });
 }
@@ -162,12 +162,12 @@ void ReplyObject::finished(ListenerBase::Reason r, string const& error_message) 
     }
     catch (std::exception const& e)
     {
-        cerr << "ReplyObject::finished(): " << e.what() << endl;
+        errlog << "ReplyObject::finished(): " << e.what();
         // TODO: log error
     }
     catch (...)
     {
-        cerr << "ReplyObject::finished(): unknown exception" << endl;
+        errlog << "ReplyObject::finished(): unknown exception";
         // TODO: log error
     }
 }

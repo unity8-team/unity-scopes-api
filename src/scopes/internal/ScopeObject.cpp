@@ -19,6 +19,7 @@
 #include <unity/scopes/internal/ScopeObject.h>
 
 #include <unity/scopes/internal/ActivationQueryObject.h>
+#include <unity/scopes/internal/Logging.h>
 #include <unity/scopes/internal/MWQuery.h>
 #include <unity/scopes/internal/MWReply.h>
 #include <unity/scopes/internal/PreviewQueryObject.h>
@@ -29,7 +30,6 @@
 #include <unity/UnityExceptions.h>
 
 #include <cassert>
-#include <iostream> // TODO: remove this once logging is added
 #include <sstream>
 
 using namespace std;
@@ -122,7 +122,7 @@ MWQueryCtrlProxy ScopeObject::query(MWReplyProxy const& reply, MiddlewareBase* m
         catch (...)
         {
         }
-        cerr << "query(): " << e.what() << endl;
+        errlog << "query(): " << e.what();
         // TODO: log error
         throw;
     }
@@ -135,7 +135,7 @@ MWQueryCtrlProxy ScopeObject::query(MWReplyProxy const& reply, MiddlewareBase* m
         catch (...)
         {
         }
-        cerr << "query(): unknown exception" << endl;
+        errlog << "query(): unknown exception";
         // TODO: log error
         throw;
     }

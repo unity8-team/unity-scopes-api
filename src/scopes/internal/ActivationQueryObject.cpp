@@ -21,7 +21,7 @@
 #include <unity/scopes/ActivationBase.h>
 #include <unity/scopes/internal/MWReply.h>
 #include <unity/scopes/internal/MWQueryCtrl.h>
-#include <iostream>
+#include <unity/scopes/internal/Logging.h>
 #include <cassert>
 
 using namespace std;
@@ -69,13 +69,13 @@ void ActivationQueryObject::run(MWReplyProxy const& reply, InvokeInfo const& /* 
     {
         // TODO: log error
         reply_->finished(ListenerBase::Error, e.what());     // Oneway, can't block
-        cerr << "ActivationQueryObject::run(): " << e.what() << endl;
+        errlog << "ActivationQueryObject::run(): " << e.what();
     }
     catch (...)
     {
         // TODO: log error
         reply_->finished(ListenerBase::Error, "unknown exception");     // Oneway, can't block
-        cerr << "ActivationQueryObject::run(): unknown exception" << endl;
+        errlog << "ActivationQueryObject::run(): unknown exception";
     }
 }
 

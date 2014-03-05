@@ -16,6 +16,7 @@
  * Authored by: Michi Henning <michi.henning@canonical.com>
  */
 
+#include <unity/scopes/internal/Logging.h>
 #include <unity/scopes/internal/ReplyImpl.h>
 #include <unity/scopes/internal/MiddlewareBase.h>
 #include <unity/scopes/internal/MWReply.h>
@@ -36,7 +37,6 @@
 
 #include <sstream>
 #include <cassert>
-#include <iostream> // TODO: remove this once logging is added
 
 using namespace std;
 
@@ -261,7 +261,7 @@ void ReplyImpl::finished(ListenerBase::Reason reason)
         catch (std::exception const& e)
         {
             // TODO: log error
-            cerr << e.what() << endl;
+            errlog << e.what();
         }
     }
 }
@@ -289,7 +289,7 @@ void ReplyImpl::error(exception_ptr ex)
         error_message = "unknown exception";
     }
     // TODO: log error
-    cerr << error_message << endl;
+    errlog << error_message;
 
     try
     {
@@ -298,7 +298,7 @@ void ReplyImpl::error(exception_ptr ex)
     catch (std::exception const& e)
     {
         // TODO: log error
-        cerr << e.what() << endl;
+        errlog << e.what();
     }
 }
 

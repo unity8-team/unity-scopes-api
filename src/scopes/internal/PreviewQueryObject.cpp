@@ -16,6 +16,7 @@
  * Authored by: Michal Hruby <michal.hruby@canonical.com>
 */
 
+#include <unity/scopes/internal/Logging.h>
 #include <unity/scopes/internal/PreviewQueryObject.h>
 #include <unity/scopes/ListenerBase.h>
 #include <unity/scopes/internal/MWReply.h>
@@ -25,7 +26,6 @@
 #include <unity/scopes/ReplyProxyFwd.h>
 #include <unity/scopes/SearchReply.h>
 #include <unity/scopes/PreviewReply.h>
-#include <iostream>
 #include <cassert>
 
 using namespace std;
@@ -78,13 +78,13 @@ void PreviewQueryObject::run(MWReplyProxy const& reply, InvokeInfo const& /* inf
         pushable_ = false;
         // TODO: log error
         reply_->finished(ListenerBase::Error, e.what());     // Oneway, can't block
-        cerr << "PreviewQueryObject::run(): " << e.what() << endl;
+        errlog << "PreviewQueryObject::run(): " << e.what();
     }
     catch (...)
     {
         // TODO: log error
         reply_->finished(ListenerBase::Error, "unknown exception");     // Oneway, can't block
-        cerr << "PreviewQueryObject::run(): unknown exception" << endl;
+        errlog << "PreviewQueryObject::run(): unknown exception";
     }
 }
 

@@ -19,6 +19,7 @@
 #include <unity/scopes/internal/RuntimeImpl.h>
 
 #include <unity/scopes/internal/DfltConfig.h>
+#include <unity/scopes/internal/Logging.h>
 #include <unity/scopes/internal/RegistryConfig.h>
 #include <unity/scopes/internal/RegistryImpl.h>
 #include <unity/scopes/internal/RuntimeConfig.h>
@@ -30,7 +31,6 @@
 
 #include <cassert>
 #include <future>
-#include <iostream> // TODO: remove this once logging is added
 
 
 using namespace std;
@@ -72,7 +72,7 @@ RuntimeImpl::RuntimeImpl(string const& scope_name, string const& configfile) :
 
         if (registry_configfile_.empty() || registry_identity_.empty())
         {
-            cerr << "Warning: no registry configured" << endl;
+            errlog << "Warning: no registry configured";
             registry_identity_ = "";
         }
         else
@@ -100,12 +100,12 @@ RuntimeImpl::~RuntimeImpl()
     }
     catch (std::exception const& e) // LCOV_EXCL_LINE
     {
-        cerr << "~RuntimeImpl(): " << e.what() << endl;
+        errlog << "~RuntimeImpl(): " << e.what();
         // TODO: log error
     }
     catch (...) // LCOV_EXCL_LINE
     {
-        cerr << "~RuntimeImpl(): unknown exception" << endl;
+        errlog << "~RuntimeImpl(): unknown exception";
         // TODO: log error
     }
 }

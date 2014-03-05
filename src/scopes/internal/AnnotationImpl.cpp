@@ -16,9 +16,9 @@
  */
 
 #include <unity/scopes/internal/AnnotationImpl.h>
+#include <unity/scopes/internal/Logging.h>
 #include <unity/UnityExceptions.h>
 #include <sstream>
-#include <iostream>
 #include <cassert>
 
 namespace unity
@@ -85,7 +85,7 @@ void AnnotationImpl::set_label(std::string const& label)
 {
     if (annotation_type_ != Annotation::Type::GroupedLink)
     {
-        std::cerr << "Annotation::set_label(): label is allowed in GroupedLink only" << std::endl;
+        errlog << "Annotation::set_label(): label is allowed in GroupedLink only";
     }
     label_ = label;
 }
@@ -94,7 +94,7 @@ void AnnotationImpl::set_icon(std::string const& icon)
 {
     if (annotation_type_ != Annotation::Type::Link)
     {
-        std::cerr << "Annotation::set_icon(): icon is allowed in Link annotations only" << std::endl;
+        errlog << "Annotation::set_icon(): icon is allowed in Link annotations only";
     }
     icon_ = icon;
 }
@@ -112,7 +112,7 @@ std::string AnnotationImpl::label() const
 {
     if (annotation_type_ != Annotation::Type::GroupedLink)
     {
-        std::cerr << "Annotation::label(): label is allowed in GroupedLink only" << std::endl;
+        errlog << "Annotation::label(): label is allowed in GroupedLink only";
     }
     return label_;
 }
@@ -121,7 +121,7 @@ std::string AnnotationImpl::icon() const
 {
     if (annotation_type_ != Annotation::Type::Link)
     {
-        std::cerr << "Annotation::icon(): icon is allowed in Link annotations only" << std::endl;
+        errlog << "Annotation::icon(): icon is allowed in Link annotations only";
     }
     return icon_;
 }
