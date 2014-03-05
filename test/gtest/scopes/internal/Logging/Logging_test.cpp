@@ -25,6 +25,7 @@
 #include <algorithm>
 
 using namespace testing;
+using unity::scopes::internal::errlog;
 
 namespace
 {
@@ -40,7 +41,10 @@ public:
 
 TEST_F(LoggingTest, basic)
 {
-    unity::scopes::internal::errlog << "This goes to stderr.";
+    std::string msg("Second message to stderr.");
+    errlog << "First message to stderr.";
+    errlog << msg;
+    errlog << "Piecewise " << "message " << "to stderr\n";
 }
 
 
