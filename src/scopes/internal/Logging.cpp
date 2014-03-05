@@ -17,6 +17,7 @@
  */
 
 #include <unity/scopes/internal/Logging.h>
+#include <mutex>
 #include <iostream>
 
 namespace unity
@@ -27,6 +28,8 @@ namespace scopes
 
 namespace internal
 {
+
+static std::mutex print_mutex;
 
 LogStream errlog;
 
@@ -55,6 +58,7 @@ LogGatherer::LogGatherer()
 
 LogGatherer::~LogGatherer()
 {
+    std::unique_lock<std::mutex> l(print_mutex);
     if(strings.empty())
         return;
     try
