@@ -51,6 +51,19 @@ LogGatherer LogStream::operator<<(const int i)
     return l;
 }
 
+LogGatherer LogStream::operator<<(const bool i)
+{
+    LogGatherer l;
+    l << i;
+    return l;
+}
+
+LogGatherer LogStream::operator<<(const char *msg) {
+    LogGatherer l;
+    l << msg;
+    return l;
+}
+
 LogGatherer::LogGatherer()
 {
 
@@ -86,6 +99,17 @@ LogGatherer& LogGatherer::operator<<(const std::string &s)
 LogGatherer& LogGatherer::operator<<(const int i)
 {
     return *this << std::to_string(i);
+}
+
+LogGatherer& LogGatherer::operator<<(const bool i)
+{
+    std::string val(i ? "true" : "false");
+    return *this << val;
+}
+
+LogGatherer& LogGatherer::operator<<(const char *msg) {
+    strings.emplace_back(msg);
+    return *this;
 }
 
 } // namespace internal

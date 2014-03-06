@@ -40,6 +40,8 @@ public:
     LogStream();
     LogGatherer operator<<(const std::string &s);
     LogGatherer operator<<(const int i);
+    LogGatherer operator<<(const char *msg);
+    LogGatherer operator<<(const bool i);
 };
 
 class LogGatherer final {
@@ -50,6 +52,8 @@ public:
     ~LogGatherer();
     LogGatherer& operator<<(const std::string &s);
     LogGatherer& operator<<(const int i);
+    LogGatherer& operator<<(const bool i);
+    LogGatherer& operator<<(const char *msg);
 
 private:
     std::vector<std::string> strings;
