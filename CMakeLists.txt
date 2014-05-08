@@ -123,8 +123,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wno-variadic-macros -Wextra
 
 # By default, all symbols are visible in the library. We strip out things we don't
 # want at link time, by running a version script (see unity-scopes.map and the
-# setting of LINK_FLAGS below).
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=default")
+# setting of LINK_FLAGS below). We just hide the inlines because that is safe
+# and gives the compiler more possibilities to optimize.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pedantic -Wall -Wextra")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra") # Can't use -std=c++11 with C compiler
