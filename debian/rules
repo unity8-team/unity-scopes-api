@@ -5,11 +5,18 @@
 #export DH_VERBOSE=1
 export DPKG_GENSYMBOLS_CHECK_LEVEL=4
 
+include /usr/share/dpkg/default.mk
+
+# Explicitly selecting a G{CC,++}-version here to avoid accidental
+# ABI breaks introduced by toolchain updates.
+export CC=$(DEB_HOST_GNU_TYPE)-gcc-4.9
+export CXX=$(DEB_HOST_GNU_TYPE)-g++-4.9
+
 %:
 	dh $@ --parallel --fail-missing --with click
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DLIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH)
+	dh_auto_configure -- -DLIBDIR=/usr/lib/$(DEB_HOST_MULTIARCH) -DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX)
 
 # Tests are not written to be run in parallel.
 override_dh_auto_test:
