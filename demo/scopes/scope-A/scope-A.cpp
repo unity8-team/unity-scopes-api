@@ -95,6 +95,33 @@ private:
     string scope_id_;
 };
 
+class InstallingPreview : public PreviewQueryBase
+{
+public:
+    InstallingPreview(Result const& result, ActionMetadata const& metadata) :
+                   PreviewQueryBase(result, metadata)
+    {
+
+    }
+
+    virtual void cancelled() override
+    {
+    }
+
+    virtual void run(PreviewReplyProxy const& reply) override
+    {
+        PreviewWidgetList widgets;
+        widgets.emplace_back(PreviewWidget(R"({"id": "header", "type": "header", "title": "Actual installation happens now...", "subtitle": "0% and counting!", "rating": "rating"})"));
+
+        if (!reply->push(widgets))
+        {
+            return;  // Query was cancelled
+        }
+        cerr << "scope-A: preview for \"" << result().uri() << "\" complete" << endl;
+    }
+
+};
+
 class MyPreview : public PreviewQueryBase
 {
 public:
@@ -120,33 +147,16 @@ public:
         widgets.emplace_back(PreviewWidget(R"({"id": "header", "type": "header", "title": "title", "subtitle": "author", "rating": "rating"})"));
         widgets.emplace_back(PreviewWidget(R"({"id": "img", "type": "image", "art": "screenshot-url"})"));
 
-        PreviewWidget w("img2", "image");
-        w.add_attribute_value("zoomable", Variant(false));
-        w.add_attribute_mapping("art", "screenshot-url");
-        widgets.emplace_back(w);
+        PreviewWidget buttons("buttons", "actions");
+        VariantBuilder builder;
+        builder.add_tuple({
+            {"id", Variant("install_id")},
+            {"label", Variant("Install")}
+        });
+        buttons.add_attribute_value("actions", builder.end());
+        widgets.emplace_back(buttons);
 
-        ColumnLayout layout1col(1);
-        layout1col.add_column({"header", "title"});
-
-        ColumnLayout layout2col(2);
-        layout2col.add_column({"header", "title"});
-        layout2col.add_column({"author", "rating"});
-
-        ColumnLayout layout3col(3);
-        layout3col.add_column({"header", "title"});
-        layout3col.add_column({"author"});
-        layout3col.add_column({"rating"});
-
-        reply->register_layout({layout1col, layout2col, layout3col});
         if (!reply->push(widgets))
-        {
-            return;  // Query was cancelled
-        }
-        if (!reply->push("author", Variant("Foo")))
-        {
-            return;  // Query was cancelled
-        }
-        if (!reply->push("rating", Variant("4 blah")))
         {
             return;  // Query was cancelled
         }
@@ -155,6 +165,36 @@ public:
 
 private:
     string scope_id_;
+};
+
+class MyActivationQuery : public ActivationQueryBase
+{
+protected:
+    ActivationResponse::Status status_ = ActivationResponse::Status::ShowPreview;
+    VariantMap hints_;
+public:
+    MyActivationQuery(const Result& result, const ActionMetadata& metadata)
+        : ActivationQueryBase(result, metadata)
+    {
+
+    }
+    void setStatus(ActivationResponse::Status status)
+    {
+        status_ = status;
+    }
+
+    void setHint(std::string key, unity::scopes::Variant value)
+    {
+        hints_[key] = value;
+    }
+
+    ActivationResponse activate() override
+    {
+        auto response = ActivationResponse(status_);
+        response.set_scope_data(Variant(hints_));
+        return response;
+    }
+
 };
 
 class MyScope : public ScopeBase
@@ -175,9 +215,32 @@ public:
 
     virtual PreviewQueryBase::UPtr preview(Result const& result, ActionMetadata const& metadata) override
     {
+
+        if (metadata.scope_data().which() != Variant::Type::Null)
+        {
+            auto metadict = metadata.scope_data().get_dict();
+            if (metadict.count("action_id") != 0  && metadict["action_id"].get_string() == "install_hint")
+            {
+                return PreviewQueryBase::UPtr(new InstallingPreview(result, metadata));
+            }
+        }
+
         PreviewQueryBase::UPtr preview(new MyPreview(result, metadata, scope_id_));
         cerr << "scope-A: created previewer: \"" << result.uri() << "\"" << endl;
         return preview;
+    }
+
+    virtual ActivationQueryBase::UPtr perform_action(Result const& result,
+                                                     ActionMetadata const& metadata,
+                                                     std::string const& /*widget_id*/,
+                                                     std::string const& action_id) override
+    {
+        auto activation = new MyActivationQuery(result, metadata);
+        if (action_id == "install_id") {
+            activation->setHint("action_id", Variant("install_hint"));
+            activation->setStatus(ActivationResponse::Status::ShowPreview);
+        }
+        return ActivationQueryBase::UPtr(activation);
     }
 
 private:
