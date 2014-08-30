@@ -108,8 +108,15 @@ public:
     {
     }
 
+    void startInstallation()
+    {
+        // The call to download-manager to start the installation would happen *here*
+    }
+
     virtual void run(PreviewReplyProxy const& reply) override
     {
+        startInstallation();
+
         PreviewWidgetList widgets;
         widgets.emplace_back(PreviewWidget(R"({"id": "header", "type": "header", "title": "Actual installation happens now...", "subtitle": "0% and counting!", "rating": "rating"})"));
 
