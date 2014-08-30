@@ -110,7 +110,8 @@ public:
 
     void startInstallation()
     {
-        // The call to download-manager to start the installation would happen *here*
+        // The dbus call to download-manager to start the installation and get the "object_path" would happen *here*
+        // the object_path is then used to show the progress
     }
 
     virtual void run(PreviewReplyProxy const& reply) override
