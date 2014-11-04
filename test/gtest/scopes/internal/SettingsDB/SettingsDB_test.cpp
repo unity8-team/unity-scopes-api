@@ -27,7 +27,6 @@
 #include <boost/filesystem/operations.hpp>
 #undef BOOST_NO_CXX11_SCOPED_ENUMS
 
-#include <unity/scopes/internal/max_align_clang_bug.h>  // TODO: remove this once clang 3.5.2 is released
 #include <boost/regex.hpp>  // Use Boost implementation until http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631 is fixed.
 #include <gtest/gtest.h>
 #include <ctime>
@@ -51,14 +50,35 @@ void write_db(const string& src)
   auto later = now + chrono::seconds(10); \
   while (now < later) \
   { \
-    if (expected == actual) \
+    if ((expected) == (actual)) \
     { \
         break; \
     } \
     this_thread::sleep_for(chrono::milliseconds(10)); \
     now = chrono::system_clock::now(); \
   } \
-  EXPECT_EQ(expected, actual); \
+  EXPECT_EQ((expected), (actual)); \
+}
+
+#define TRY_EXPECT_TRUE(expr) \
+{ \
+  auto now = chrono::system_clock::now(); \
+  auto later = now + chrono::seconds(10); \
+  while (now < later) \
+  { \
+    if (expr) \
+    { \
+        break; \
+    } \
+    this_thread::sleep_for(chrono::milliseconds(10)); \
+    now = chrono::system_clock::now(); \
+  } \
+  EXPECT_TRUE(expr); \
+}
+
+#define TRY_EXPECT_FALSE(expr) \
+{ \
+  TRY_EXPECT_TRUE(!(expr)); \
 }
 
 TEST(SettingsDB, basic)
@@ -135,7 +155,7 @@ TEST(SettingsDB, basic)
         EXPECT_EQ("New York", db->settings()["locationSetting"].get_string());
         EXPECT_EQ(0, db->settings()["unitTempSetting"].get_int());
         EXPECT_EQ(42, db->settings()["ageSetting"].get_double());
-        TRY_EXPECT_EQ(false, db->settings()["enabledSetting"].get_bool());
+        TRY_EXPECT_FALSE(db->settings()["enabledSetting"].get_bool());
     }
 
     {

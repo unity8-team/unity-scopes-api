@@ -1,10 +1,95 @@
-unity-scopes-api (0.6.2+rtm+rtm+rtm+14.09.20140818-0ubuntu1) 14.09; urgency=medium
+unity-scopes-api (0.6.7+14.10.20141014-0ubuntu1) 14.09; urgency=low
+
+  [ Marcus Tomlinson ]
+  * Merge staging ( (LP: #1380588)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 14 Oct 2014 12:06:24 +0000
+
+unity-scopes-api (0.6.7+14.10.20141010.1-0ubuntu1) utopic; urgency=medium
+
+  [ Marcus Tomlinson ]
+  * OnlineAccountClient fixes: run the internal event loop within its own context to avoid
+    clashing with external main loop (LP: #1377147).
+  * Introduced new dependencies on dbus-test-runner and libdbustest1-dev.
+  * Fix for Zmq infinite reconnection problem (LP: #1374206)
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 10 Oct 2014 19:24:20 +0000
+
+unity-scopes-api (0.6.6+14.10.20141006-0ubuntu1) utopic; urgency=medium
+
+  [ Pawel Stolowski ]
+  * Removed duplicates from symbols file. Symbols file now maintained
+    in sorted order. Created script to maintain file in sorted order,
+    so we should no longer see the stuff-ups in the symbols file.
+  * Added valgrind to build deps.
+  * Load-balancing message pump.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 06 Oct 2014 12:03:20 +0000
+
+unity-scopes-api (0.6.6+14.10.20140916-0ubuntu1) utopic; urgency=medium
+
+  [ Marcus Tomlinson ]
+  * Added support for online accounts (via new OnlineAccountClient class).
+  * Introduced new dependencies on libaccounts-glib and libsignon-glib.
+
+  [ Ubuntu daily release ]
+  * debian/libunity-scopes3.symbols: auto-update to released version
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 16 Sep 2014 09:40:03 +0000
+
+unity-scopes-api (0.6.5+14.10.20140910.1-0ubuntu1) utopic; urgency=medium
+
+  [ Pawel Stolowski ]
+  * Added support for expandable widgets.
+  * Enhanced ActionMetadata with hints, similar to SearchMetadata. (LP: #1308585)
+  * Push smart scopes online results immediately as they become available. (LP: #1359177)
+
+  [ Michi Henning ]
+  * Various fixes for race conditions and test stability.
+    - This results in *safe* internal symbol changes.
+  * Updates to scope tutorial and documentation.
+
+  [ Ubuntu daily release ]
+  * debian/libunity-scopes3.symbols: auto-update to released version
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 10 Sep 2014 08:49:56 +0000
+
+unity-scopes-api (0.6.4+14.10.20140828.1-0ubuntu1) utopic; urgency=medium
+
+  [ Pawel Stolowski ]
+  * Execute SDK DBus callback on scope start and stop in debug mode.
+
+  [ Ubuntu daily release ]
+  * debian/libunity-scopes3.symbols: auto-update to released version
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 28 Aug 2014 14:01:50 +0000
+
+unity-scopes-api (0.6.3+14.10.20140826-0ubuntu1) utopic; urgency=medium
+
+  [ Pawel Stolowski ]
+  * Fix two-way invoke thread pool - fixes lp:1359582.
+  * Fix ABI break caused by introduction of explicit destructor.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 26 Aug 2014 13:44:05 +0000
+
+unity-scopes-api (0.6.3+14.10.20140820.is.0.6.1+14.10.20140809-0ubuntu1) utopic; urgency=medium
+
+  * Do a quick emergency revert of the last landing as it is causing a
+    regression in local music search.
+
+ -- Åukasz 'sil2100' Zemczak <lukasz.zemczak@canonical.com>  Thu, 21 Aug 2014 10:16:44 +0200
+
+unity-scopes-api (0.6.3+14.10.20140820-0ubuntu1) utopic; urgency=medium
 
   [ Pete Woods ]
   * Move scope configuration to ~/.config/unity-scopes/
   * New setting to enable/disable location data being fed to scopes.
   * Switch from u1db to QSettings and drop u1db and related dependencies.
   * There are internal symbols changes that do not break the public ABI.
+    - Apologies for the symbol sorting. The previous release caused this.
 
   [ Marcus Tomlinson ]
   * Add scope debug mode parameter.
@@ -12,12 +97,14 @@ unity-scopes-api (0.6.2+rtm+rtm+rtm+14.09.20140818-0ubuntu1) 14.09; urgency=medi
   [ Michi Henning ]
   * Fix several race conditions.
   * Make tests more robust.
+  * Fix cache directory paths for confined scopes.
 
   [ Ubuntu daily release ]
   * debian/libunity-scopes3.symbols: auto-update to released version
   * New rebuild forced
+  * New rebuild forced
 
- -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 18 Aug 2014 17:57:51 +0000
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 20 Aug 2014 14:25:35 +0000
 
 unity-scopes-api (0.6.1+14.10.20140809-0ubuntu1) utopic; urgency=medium
 

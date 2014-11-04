@@ -24,6 +24,9 @@
 
 #include <future>
 #include <string>
+#include <functional>
+#include <list>
+#include <tuple>
 
 namespace unity
 {
@@ -39,6 +42,8 @@ namespace smartscopes
 
 class HttpResponseHandle;
 
+typedef std::list<std::pair<std::string, std::string>> HttpHeaders;
+
 class HttpClientInterface : public std::enable_shared_from_this<HttpClientInterface>
 {
 public:
@@ -48,7 +53,9 @@ public:
     HttpClientInterface() = default;
     virtual ~HttpClientInterface() = default;
 
-    virtual std::shared_ptr<HttpResponseHandle> get(std::string const& request_url) = 0;
+    virtual std::shared_ptr<HttpResponseHandle> get(std::string const& request_url,
+            std::function<void(std::string const&)> const& lineData = [](std::string const&) {},
+            HttpHeaders const& headers = HttpHeaders()) = 0;
 
     virtual std::string to_percent_encoding(std::string const& string) = 0;
 
@@ -64,7 +71,7 @@ public:
     NONCOPYABLE(HttpResponseHandle);
     UNITY_DEFINES_PTRS(HttpResponseHandle);
 
-    HttpResponseHandle(HttpClientInterface::SPtr client, unsigned int session_id, std::shared_future<std::string> future)
+    HttpResponseHandle(HttpClientInterface::SPtr client, unsigned int session_id, std::shared_future<void> future)
         : client_(client)
         , session_id_(session_id)
         , future_(future)
@@ -81,9 +88,9 @@ public:
         future_.wait();
     }
 
-    std::string get()
+    void get()
     {
-        return future_.get();
+        future_.get();
     }
 
     void cancel()
@@ -94,7 +101,7 @@ public:
 private:
     std::shared_ptr<HttpClientInterface> client_;
     unsigned int session_id_;
-    std::shared_future<std::string> future_;
+    std::shared_future<void> future_;
 };
 
 }  // namespace smartscopes

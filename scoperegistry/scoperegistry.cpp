@@ -33,7 +33,6 @@
 #include <unity/UnityExceptions.h>
 #include <unity/util/ResourcePtr.h>
 
-#include <unity/scopes/internal/max_align_clang_bug.h>  // TODO: remove this once clang 3.5.2 is released
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
@@ -428,6 +427,7 @@ void add_local_scope(RegistryObject::SPtr const& registry,
     }
     exec_data.runtime_config = config_file;
     exec_data.scope_config = scope.second;
+    exec_data.debug_mode = sc.debug_mode();
 
     registry->add_local_scope(scope.first, move(meta), exec_data);
 }
@@ -542,7 +542,7 @@ int main(int argc, char* argv[])
 
         // The registry object stores the local and remote scopes
         Executor::SPtr executor = make_shared<Executor>();
-        RegistryObject::SPtr registry(new RegistryObject(*signal_handler_wrapper.death_observer, executor, middleware));
+        RegistryObject::SPtr registry(new RegistryObject(*signal_handler_wrapper.death_observer, executor, middleware, true));
 
         // Add the metadata for each scope to the lookup table.
         // We do this before starting any of the scopes, so aggregating scopes don't get a lookup failure if

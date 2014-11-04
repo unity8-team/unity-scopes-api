@@ -67,6 +67,8 @@ pkg_check_modules(APPARMOR REQUIRED libapparmor REQUIRED)
 pkg_check_modules(LTTNG_UST lttng-ust REQUIRED)
 pkg_check_modules(LIBURCU_BP liburcu-bp REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp REQUIRED)
+pkg_check_modules(LIBACCOUNTS REQUIRED libaccounts-glib)
+pkg_check_modules(LIBSIGNON REQUIRED libsignon-glib)
 
 find_program(LTTNG_EXECUTABLE lttng)
 if (NOT LTTNG_EXECUTABLE)
@@ -109,8 +111,10 @@ if(NOT CAPNPC_BIN)
 endif()
 set(CAPNPC_FLAGS "" CACHE STRING "Extra flags for capnpc.")
 
-set(OTHER_INCLUDE_DIRS ${OTHER_INCLUDE_DIRS} ${UNITY_API_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS} ${PROCESS_CPP_INCLUDE_DIRS} ${APPARMOR_INCLUDE_DIRS})
-set(OTHER_LIBS ${UNITY_API_LDFLAGS} ${APPARMOR_LDFLAGS} ${OTHER_LIBS})
+set(OTHER_INCLUDE_DIRS ${OTHER_INCLUDE_DIRS} ${UNITY_API_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                       ${JSONCPP_INCLUDE_DIRS} ${PROCESS_CPP_INCLUDE_DIRS} ${APPARMOR_INCLUDE_DIRS}
+                       ${LIBACCOUNTS_INCLUDE_DIRS} ${LIBSIGNON_INCLUDE_DIRS})
+set(OTHER_LIBS ${OTHER_LIBS} ${UNITY_API_LDFLAGS} ${APPARMOR_LDFLAGS} ${LIBACCOUNTS_LIBRARIES} ${LIBSIGNON_LIBRARIES})
 
 # Standard install paths
 include(GNUInstallDirs)
@@ -191,7 +195,7 @@ set(UNITY_SCOPES_LIB unity-scopes)
 # API version
 set(UNITY_SCOPES_MAJOR 0)
 set(UNITY_SCOPES_MINOR 6)
-set(UNITY_SCOPES_MICRO 2)
+set(UNITY_SCOPES_MICRO 7)
 set(UNITY_SCOPES_SOVERSION 3)
 
 # Version for testing, with all symbols visible
@@ -241,14 +245,7 @@ set(OTHER_LIBS
 # All the libraries we need to link a normal executable that uses Unity scopes
 set(LIBS ${UNITY_SCOPES_LIB})
 
-# All the libraries we need to link a gtest executable. (We link the tests against a static version
-# so we can do whitebox testing on internal classes.
-
-# TODO: HACK: static linking of the tests doesn't work because the tests won't pull in virtual methods in a
-# base class from a static library without an unresolved dependency. But, without static linking, we can't
-# do whitebox tests because of the visibility=hidden compile flags. For now, we link dynamically and
-# with visbility=default.
-
+# Test version of ${UNITY_SCOPES_LIB}, with internal symbols visible
 set(TESTLIBS ${UNITY_SCOPES_TEST_LIB})
 
 # Library install prefix
@@ -363,7 +360,12 @@ install(TARGETS ${UNITY_SCOPES_LIB} LIBRARY DESTINATION ${LIB_INSTALL_PREFIX})
 # Enable coverage testing
 
 if (cmake_build_type_lower MATCHES coverage)
-  ENABLE_COVERAGE_REPORT(TARGETS ${UNITY_SCOPES_LIB} smartscopes FILTER /usr/include ${CMAKE_SOURCE_DIR}/test/* ${CMAKE_BINARY_DIR}/*)
+  ENABLE_COVERAGE_REPORT(TARGETS ${UNITY_SCOPES_LIB} smartscopes
+                         FILTER /usr/include
+                                ${CMAKE_SOURCE_DIR}/test/*
+                                ${CMAKE_SOURCE_DIR}/debian/tests/*
+                                ${CMAKE_SOURCE_DIR}/demo/*
+                                ${CMAKE_BINARY_DIR}/*)
 endif()
 
 #

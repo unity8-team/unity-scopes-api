@@ -28,7 +28,6 @@
 #include <unity/scopes/ScopeExceptions.h>
 #include <unity/UnityExceptions.h>
 
-#include <unity/scopes/internal/max_align_clang_bug.h>  // TODO: remove this once clang 3.5.2 is released
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <core/posix/signal.h>
@@ -201,13 +200,6 @@ int run_scope(std::string const& runtime_config, std::string const& scope_config
 int
 main(int argc, char* argv[])
 {
-    // sig masks are inherited by child processes when forked.
-    // we do not want to inherit our parent's (scoperegistry)
-    // sig mask, hence we clear it immediately on entry.
-    sigset_t set;
-    ::sigemptyset(&set);
-    ::pthread_sigmask(SIG_SETMASK, &set, nullptr);
-
     prog_name = basename(argv[0]);
     if (argc != 3)
     {

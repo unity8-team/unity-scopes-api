@@ -20,20 +20,25 @@
 
 #include <unity/scopes/internal/MWRegistry.h>
 #include <unity/scopes/internal/RuntimeImpl.h>
+#include <unity/scopes/internal/Utils.h>
 #include <unity/scopes/ScopeExceptions.h>
 #include <unity/UnityExceptions.h>
 #include <unity/util/ResourcePtr.h>
 
-#include <unity/scopes/internal/max_align_clang_bug.h>  // TODO: remove this once clang 3.5.2 is released
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <core/posix/child_process.h>
 #include <core/posix/exec.h>
 
 #include <cassert>
+#include <fstream>
 #include <wordexp.h>
+#include <iostream>
 
 using namespace std;
+
+static const char* c_debug_dbus_started_cmd = "dbus-send --type=method_call --dest=com.ubuntu.SDKAppLaunch /ScopeRegistryCallback com.ubuntu.SDKAppLaunch.ScopeLoaded";
+static const char* c_debug_dbus_stopped_cmd = "dbus-send --type=method_call --dest=com.ubuntu.SDKAppLaunch /ScopeRegistryCallback com.ubuntu.SDKAppLaunch.ScopeStopped";
 
 namespace unity
 {
@@ -46,7 +51,8 @@ namespace internal
 
 RegistryObject::RegistryObject(core::posix::ChildProcess::DeathObserver& death_observer,
                                Executor::SPtr const& executor,
-                               MiddlewareBase::SPtr middleware)
+                               MiddlewareBase::SPtr middleware,
+                               bool generate_desktop_files)
     : death_observer_(death_observer),
       death_observer_connection_
       {
@@ -64,7 +70,8 @@ RegistryObject::RegistryObject(core::posix::ChildProcess::DeathObserver& death_o
               on_state_received(id, s);
           })
       },
-      executor_(executor)
+      executor_(executor),
+      generate_desktop_files_(generate_desktop_files)
 {
     if (middleware)
     {
@@ -249,6 +256,8 @@ bool RegistryObject::add_local_scope(std::string const& scope_id, ScopeMetadata 
         // Send a blank message to subscribers to inform them that the registry has been updated
         publisher_->send_message("");
     }
+
+    create_desktop_file(metadata);
     return return_value;
 }
 
@@ -281,6 +290,7 @@ bool RegistryObject::remove_local_scope(std::string const& scope_id)
             // Send a blank message to subscribers to inform them that the registry has been updated
             publisher_->send_message("");
         }
+        remove_desktop_file(scope_id);
         return true;
     }
 
@@ -337,7 +347,75 @@ void RegistryObject::on_state_received(std::string const& scope_id, StateReceive
     // simply ignore states from scopes the registry does not know about
 }
 
-RegistryObject::ScopeProcess::ScopeProcess(ScopeExecData exec_data, MWPublisher::SPtr publisher)
+std::string RegistryObject::desktop_files_dir()
+{
+    // First check if a test directory has been set
+    const char* desktop_files_dir = getenv("TEST_DESKTOP_FILES_DIR");
+    if (desktop_files_dir)
+    {
+        return desktop_files_dir;
+    }
+
+    // If no test directory has been set, get the regular applications dir
+    desktop_files_dir = getenv("HOME");
+    if (!desktop_files_dir)
+    {
+        throw unity::scopes::ConfigException("RegistryObject: HOME not set");
+    }
+
+    return std::string(desktop_files_dir) + "/.local/share/applications";
+}
+
+void RegistryObject::create_desktop_file(ScopeMetadata const& metadata)
+{
+    std::string desktop_file_path = desktop_files_dir();
+    if (!generate_desktop_files_ || desktop_file_path.empty())
+    {
+        return;
+    }
+
+    desktop_file_path += "/" + metadata.scope_id() + ".desktop";
+
+    std::ofstream desktop_file(desktop_file_path.c_str());
+    if (!desktop_file)
+    {
+        throw unity::SyscallException("RegistryObject::create_desktop_file: unable to create desktop file: \"" + desktop_file_path + "\"", errno);
+    }
+
+    desktop_file << "[Desktop Entry]" << std::endl;
+    desktop_file << "Type=Application" << std::endl;
+    desktop_file << "NoDisplay=true" << std::endl;
+    desktop_file << "Name=" << metadata.display_name() << std::endl;
+    desktop_file << "Icon=";
+    try
+    {
+        desktop_file << metadata.icon();
+    }
+    catch (NotFoundException const&)
+    {
+        // Icon is optional.
+    }
+    desktop_file << endl;
+    desktop_file.close();
+}
+
+void RegistryObject::remove_desktop_file(std::string const& scope_id)
+{
+    std::string desktop_file_path = desktop_files_dir();
+    if (!generate_desktop_files_ || desktop_file_path.empty())
+    {
+        return;
+    }
+
+    desktop_file_path += "/" + scope_id + ".desktop";
+
+    if (boost::filesystem::exists(desktop_file_path))
+    {
+        boost::filesystem::remove(desktop_file_path);
+    }
+}
+
+RegistryObject::ScopeProcess::ScopeProcess(ScopeExecData exec_data, std::weak_ptr<MWPublisher> const& publisher)
     : exec_data_(exec_data)
     , reg_publisher_(publisher)
     , manually_started_(false)
@@ -518,16 +596,17 @@ void RegistryObject::ScopeProcess::clear_handle_unlocked()
 
 void RegistryObject::ScopeProcess::update_state_unlocked(ProcessState new_state)
 {
+    auto reg_publisher = reg_publisher_.lock();
     if (new_state == state_)
     {
         return;
     }
     else if (new_state == Running)
     {
-        if (reg_publisher_)
+        if (reg_publisher)
         {
             // Send a "started" message to subscribers to inform them that this scope (topic) has started
-            reg_publisher_->send_message("started", exec_data_.scope_id);
+            reg_publisher->send_message("started", exec_data_.scope_id);
         }
 
         if (state_ != Starting)
@@ -540,10 +619,10 @@ void RegistryObject::ScopeProcess::update_state_unlocked(ProcessState new_state)
     }
     else if (new_state == Stopped)
     {
-        if (reg_publisher_)
+        if (reg_publisher)
         {
             // Send a "stopped" message to subscribers to inform them that this scope (topic) has stopped
-            reg_publisher_->send_message("stopped", exec_data_.scope_id);
+            reg_publisher->send_message("stopped", exec_data_.scope_id);
         }
 
         if (state_ != Stopping)
@@ -554,10 +633,10 @@ void RegistryObject::ScopeProcess::update_state_unlocked(ProcessState new_state)
     }
     else if (new_state == Stopping && manually_started_)
     {
-        if (reg_publisher_)
+        if (reg_publisher)
         {
             // Send a "stopped" message to subscribers to inform them that this scope (topic) has stopped
-            reg_publisher_->send_message("stopped", exec_data_.scope_id);
+            reg_publisher->send_message("stopped", exec_data_.scope_id);
         }
 
         cout << "RegistryObject::ScopeProcess: Manually started process for scope: \""
@@ -662,6 +741,52 @@ std::vector<std::string> RegistryObject::ScopeProcess::expand_custom_exec()
     }
 
     return command_args;
+}
+
+void RegistryObject::ScopeProcess::publish_state_change(ProcessState scope_state)
+{
+    auto reg_publisher = reg_publisher_.lock();
+
+    if (scope_state == Running)
+    {
+        if (reg_publisher)
+        {
+            // Send a "started" message to subscribers to inform them that this scope (topic) has started
+            reg_publisher->send_message("started", exec_data_.scope_id);
+        }
+        if (exec_data_.debug_mode)
+        {
+            // If we're in debug mode, callback to the SDK via dbus (used to monitor scope lifecycle)
+            std::string started_message = c_debug_dbus_started_cmd;
+            started_message += " string:" + exec_data_.scope_id + " uint64:" + std::to_string(process_.pid());
+            if (safe_system_call(started_message) != 0)
+            {
+                std::cerr << "RegistryObject::ScopeProcess::publish_state_change(): "
+                             "Failed to execute SDK DBus ScopeLoaded callback "
+                             "(Scope ID: " << exec_data_.scope_id << ")" << endl;
+            }
+        }
+    }
+    else if (scope_state == Stopped)
+    {
+        if (reg_publisher)
+        {
+            // Send a "stopped" message to subscribers to inform them that this scope (topic) has stopped
+            reg_publisher->send_message("stopped", exec_data_.scope_id);
+        }
+        if (exec_data_.debug_mode)
+        {
+            // If we're in debug mode, callback to the SDK via dbus (used to monitor scope lifecycle)
+            std::string stopped_message = c_debug_dbus_stopped_cmd;
+            stopped_message += " string:" + exec_data_.scope_id;
+            if (safe_system_call(stopped_message) != 0)
+            {
+                std::cerr << "RegistryObject::ScopeProcess::publish_state_change(): "
+                             "Failed to execute SDK DBus ScopeStopped callback "
+                             "(Scope ID: " << exec_data_.scope_id << ")" << endl;
+            }
+        }
+    }
 }
 
 } // namespace internal

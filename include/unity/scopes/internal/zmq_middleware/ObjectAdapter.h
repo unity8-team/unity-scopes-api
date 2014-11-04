@@ -94,15 +94,14 @@ private:
     void throw_bad_state(std::string const& label, AdapterState state) const;
 
     void run_workers();
-    // void init_ctrl_socket();
-    // zmqpp::socket subscribe_to_ctrl_socket();
-    // void stop_workers() noexcept;
 
     std::shared_ptr<ServantBase> find_servant(std::string const& id, std::string const& category);
 
     // Thread start functions
-    void broker_thread();
-    void worker_thread();
+    void pump(std::promise<void> ready);
+    void worker();
+
+    void dispatch(zmqpp::socket& s, std::string const& client_address);
 
     void cleanup();
     void join_with_all_threads();
@@ -115,16 +114,11 @@ private:
     RequestMode mode_;
     int pool_size_;
     int64_t idle_timeout_;
-    // std::unique_ptr<zmqpp::socket> ctrl_;       // PUB socket to signal when to deactivate
-    // std::mutex ctrl_mutex_;                     // Synchronizes access to ctrl_ when sending
     std::unique_ptr<StopPublisher> stopper_;    // Used to signal threads when it's time to terminate
-    std::thread broker_;                        // Connects router with dealer
+    std::thread pump_;                          // Load-balancing pump: router-router or pull-router
     std::vector<std::thread> workers_;          // Threads for incoming invocations
-    std::atomic_int num_workers_;               // For handshake with parent
-    std::promise<void> ready_;                  // For handshake with child threads
-    std::mutex ready_mutex_;                    // Protects ready_
-    std::once_flag once_;
     std::exception_ptr exception_;              // Failed threads deposit their exception here
+    std::once_flag once_;
 
     AdapterState state_;
     std::condition_variable state_changed_;

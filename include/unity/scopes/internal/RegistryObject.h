@@ -53,13 +53,14 @@ public:
         std::string scope_config;
         std::string confinement_profile;
         int timeout_ms;
+        bool debug_mode;
     };
 
 public:
     UNITY_DEFINES_PTRS(RegistryObject);
 
     RegistryObject(core::posix::ChildProcess::DeathObserver& death_observer, Executor::SPtr const& executor,
-                   MiddlewareBase::SPtr middleware);
+                   MiddlewareBase::SPtr middleware, bool generate_desktop_files = false);
     virtual ~RegistryObject();
 
     // Remote operation implementations
@@ -80,6 +81,10 @@ private:
     void on_process_death(core::posix::ChildProcess const& process);
     void on_state_received(std::string const& scope_id, StateReceiverObject::State const& state);
 
+    static std::string desktop_files_dir();
+    void create_desktop_file(ScopeMetadata const& metadata);
+    void remove_desktop_file(std::string const& scope_id);
+
     class ScopeProcess
     {
     public:
@@ -88,7 +93,7 @@ private:
             Stopped, Starting, Running, Stopping
         };
 
-        ScopeProcess(ScopeExecData exec_data, MWPublisher::SPtr publisher);
+        ScopeProcess(ScopeExecData exec_data, std::weak_ptr<MWPublisher> const& publisher);
         ScopeProcess(ScopeProcess const& other);
         ~ScopeProcess();
 
@@ -111,6 +116,7 @@ private:
         void kill(std::unique_lock<std::mutex>& lock);
 
         std::vector<std::string> expand_custom_exec();
+        void publish_state_change(ProcessState scope_state);
 
     private:
         const ScopeExecData exec_data_;
@@ -118,7 +124,7 @@ private:
         mutable std::mutex process_mutex_;
         mutable std::condition_variable state_change_cond_;
         core::posix::ChildProcess process_ = core::posix::ChildProcess::invalid();
-        MWPublisher::SPtr reg_publisher_;
+        std::weak_ptr<MWPublisher> reg_publisher_; // weak_ptr, so processes don't hold publisher alive
         bool manually_started_;
     };
 
@@ -138,6 +144,7 @@ private:
     mutable std::mutex mutex_;
 
     MWPublisher::SPtr publisher_;
+    bool generate_desktop_files_;
 };
 
 } // namespace internal

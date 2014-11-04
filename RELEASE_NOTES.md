@@ -1,6 +1,26 @@
 Release notes
 =============
 
+Changes in version 0.6.7
+========================
+  - OnlineAccountClient fixes: run the internal event loop within its own context to avoid
+    clashing with external main loop (LP: #1377147).
+  - Introduced new dependencies on dbus-test-runner and libdbustest1-dev.
+  - Fix for Zmq infinite reconnection problem (LP: #1374206)
+
+Changes in version 0.6.6
+========================
+  - Added support for online accounts (via new OnlineAccountClient class).
+
+Changes in version 0.6.5
+========================
+  - Implemented support for expandable preview widgets. See the documentation of PreviewWidget
+    for details of the new widget type.
+
+Changes in version 0.6.3
+========================
+  - Fix scope cache path for confined scopes.
+
 Changes in version 0.6.2
 ========================
   - Move scope configuration to ~/.config/unity-scopes/

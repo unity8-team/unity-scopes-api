@@ -25,6 +25,7 @@
 #include <unity/scopes/internal/ScopeImpl.h>
 #include <unity/scopes/internal/ScopeMetadataImpl.h>
 #include <unity/scopes/internal/smartscopes/HttpClientQt.h>
+#include <unity/scopes/internal/Utils.h>
 #include <unity/scopes/ScopeExceptions.h>
 #include <unity/UnityExceptions.h>
 
@@ -87,7 +88,7 @@ SSRegistryObject::SSRegistryObject(MiddlewareBase::SPtr middleware,
     refresh_thread_ = std::thread(&SSRegistryObject::refresh_thread, this);
 }
 
-SSRegistryObject::~SSRegistryObject() noexcept
+SSRegistryObject::~SSRegistryObject()
 {
     // stop the refresh thread
     {
@@ -374,7 +375,7 @@ void SSRegistryObject::get_remote_scopes()
     if (changed)
     {
         // something has changed, send invalidate signal
-        int result = system(c_dbussend_cmd);
+        int result = safe_system_call(c_dbussend_cmd);
         (void)result;
     }
 }
