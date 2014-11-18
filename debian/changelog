@@ -4,6 +4,14 @@ unity-scopes-api (0.6.8-0ubuntu1) UNRELEASED; urgency=medium
 
  -- Marcus Tomlinson <marcus.tomlinson@canonical.com>  Wed, 22 Oct 2014 17:44:46 +0200
 
+unity-scopes-api (0.6.7+15.04.20141107.1~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Pawel Stolowski ]
+  * Fix parameter order for the smart scopes preview request. (LP:
+    #1381930)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Nov 2014 20:23:45 +0000
+
 unity-scopes-api (0.6.7+14.10.20141014-0ubuntu1) 14.09; urgency=low
 
   [ Marcus Tomlinson ]
