@@ -1,9 +1,13 @@
 unity-scopes-api (0.6.8-0ubuntu1) UNRELEASED; urgency=medium
 
+  [ Marcus Tomlinson ]
   * Replaced dbus-send with "list updated" pub/sub to invalidate smart scopes (LP:
     #1361221)
   * Guarded attempts to create directories that must exist but cannot be created by
     confined scopes. (LP: #1376416, LP: #1378805)
+
+  [ Ubuntu daily release ]
+  * debian/libunity-scopes3.symbols: auto-update to released version
 
  -- Marcus Tomlinson <marcus.tomlinson@canonical.com>  Wed, 22 Oct 2014 17:44:46 +0200
 
