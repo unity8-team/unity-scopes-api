@@ -1,4 +1,4 @@
-unity-scopes-api (0.6.8-0ubuntu1) UNRELEASED; urgency=medium
+unity-scopes-api (0.6.8+15.04.20141202~rtm-0ubuntu1) 14.09; urgency=medium
 
   [ Marcus Tomlinson ]
   * Replaced dbus-send with "list updated" pub/sub to invalidate smart scopes (LP:
@@ -9,7 +9,7 @@ unity-scopes-api (0.6.8-0ubuntu1) UNRELEASED; urgency=medium
   [ Ubuntu daily release ]
   * debian/libunity-scopes3.symbols: auto-update to released version
 
- -- Marcus Tomlinson <marcus.tomlinson@canonical.com>  Wed, 22 Oct 2014 17:44:46 +0200
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 02 Dec 2014 14:01:59 +0000
 
 unity-scopes-api (0.6.7+15.04.20141107.1~rtm-0ubuntu1) 14.09; urgency=low
 
