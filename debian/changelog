@@ -1,3 +1,12 @@
+unity-scopes-api (0.6.8-0ubuntu1) UNRELEASED; urgency=medium
+
+  * Replaced dbus-send with "list updated" pub/sub to invalidate smart scopes (LP:
+    #1361221)
+  * Guarded attempts to create directories that must exist but cannot be created by
+    confined scopes. (LP: #1376416, LP: #1378805)
+
+ -- Marcus Tomlinson <marcus.tomlinson@canonical.com>  Wed, 22 Oct 2014 17:44:46 +0200
+
 unity-scopes-api (0.6.7+15.04.20141107.1~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Pawel Stolowski ]
