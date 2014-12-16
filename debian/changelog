@@ -1,6 +1,10 @@
 unity-scopes-api (0.6.9-0ubuntu1) UNRELEASED; urgency=medium
 
+  [ Pawel Stolowski ]
   * Added support for ChildScopes scope .ini option.
+
+  [ Ubuntu daily release ]
+  * debian/libunity-scopes3.symbols: auto-update to released version
 
  -- Pawel Stolowski <pawel.stolowski@canonical.com>  Fri, 12 Dec 2014 13:42:45 +0100
 
