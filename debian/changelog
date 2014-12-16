@@ -1,3 +1,18 @@
+unity-scopes-api (0.6.9+15.04.20141216.2~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Pawel Stolowski ]
+  * Use get() on future of the http request to get exceptions reported
+    when error occur (std::future::wait() doesn't throw). Cherry-picked
+    trunk rev. 274. (LP: #1401560)
+  * Cherry-picked support for passing partner id from /custom/partner-id
+    with remote-scopes requests maded by Smart Scopes Proxy. (LP:
+    #1389273)
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 16 Dec 2014 22:07:29 +0000
+
 unity-scopes-api (0.6.9+15.04.20141216~rtm-0ubuntu1) 14.09; urgency=medium
 
   [ Pawel Stolowski ]
