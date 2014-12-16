@@ -154,7 +154,8 @@ public:
 
     SmartScopesClient(HttpClientInterface::SPtr http_client,
                       JsonNodeInterface::SPtr json_node,
-                      std::string const& url = ""); // detect url
+                      std::string const& url = "", // detect url
+                      std::string const& partner_id_path = "");
 
     virtual ~SmartScopesClient();
 
@@ -209,7 +210,6 @@ private:
 
     std::string stringify_settings(VariantMap const& settings);
 
-private:
     HttpClientInterface::SPtr http_client_;
     JsonNodeInterface::SPtr json_node_;
 
@@ -224,6 +224,7 @@ private:
     bool have_latest_cache_;
 
     unsigned int query_counter_;
+    std::string partner_file_;
 };
 
 }  // namespace smartscopes
