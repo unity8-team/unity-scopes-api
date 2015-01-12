@@ -132,7 +132,7 @@ map<string, string> find_install_dir_configs(string const& install_dir,
                 files.insert(config);
             }
         }
-        catch (FileException const& e)
+        catch (ResourceException const& e)
         {
             error(e.what());
             error("could not open scope directory: " + scope_dir);
