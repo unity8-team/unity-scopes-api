@@ -1,3 +1,41 @@
+unity-scopes-api (0.6.9+15.04.20141216.2~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Pawel Stolowski ]
+  * Use get() on future of the http request to get exceptions reported
+    when error occur (std::future::wait() doesn't throw). Cherry-picked
+    trunk rev. 274. (LP: #1401560)
+  * Cherry-picked support for passing partner id from /custom/partner-id
+    with remote-scopes requests maded by Smart Scopes Proxy. (LP:
+    #1389273)
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 16 Dec 2014 22:07:29 +0000
+
+unity-scopes-api (0.6.9+15.04.20141216~rtm-0ubuntu1) 14.09; urgency=medium
+
+  [ Pawel Stolowski ]
+  * Added support for ChildScopes scope .ini option.
+
+  [ Ubuntu daily release ]
+  * debian/libunity-scopes3.symbols: auto-update to released version
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 16 Dec 2014 16:05:11 +0000
+
+unity-scopes-api (0.6.8+15.04.20141202~rtm-0ubuntu1) 14.09; urgency=medium
+
+  [ Marcus Tomlinson ]
+  * Replaced dbus-send with "list updated" pub/sub to invalidate smart scopes (LP:
+    #1361221)
+  * Guarded attempts to create directories that must exist but cannot be created by
+    confined scopes. (LP: #1376416, LP: #1378805)
+
+  [ Ubuntu daily release ]
+  * debian/libunity-scopes3.symbols: auto-update to released version
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 02 Dec 2014 14:01:59 +0000
+
 unity-scopes-api (0.6.7+15.04.20141107.1~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Pawel Stolowski ]
