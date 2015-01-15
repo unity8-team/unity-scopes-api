@@ -1,3 +1,16 @@
+unity-scopes-api (0.6.9+15.04.20150115~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Marcus Tomlinson ]
+  * Use SIGNON_POLICY_NO_USER_INTERACTION by default unless
+    UNITY_SCOPES_OA_UI_POLICY env var is set. Update the accounts we
+    already know about when refresh_service_statuses() is called. (LP:
+    #1380914, #1398813)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 15 Jan 2015 15:25:50 +0000
+
 unity-scopes-api (0.6.9+15.04.20141216.2~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Pawel Stolowski ]
