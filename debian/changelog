@@ -1,3 +1,11 @@
+unity-scopes-api (0.6.9+15.04.20150120~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Pawel Stolowski ]
+  * Catch file exception while iterating over individual scope dirs, so
+    that a single failure doesn't break all other scopes. (LP: #1393382)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Jan 2015 08:32:42 +0000
+
 unity-scopes-api (0.6.9+15.04.20150115~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Ubuntu daily release ]
