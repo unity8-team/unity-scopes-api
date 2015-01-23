@@ -1,3 +1,11 @@
+unity-scopes-api (0.6.9+15.04.20150123.1~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Marcus Tomlinson ]
+  * Fixed smartscopesproxy crash due to json-cpp update (LP: #1410125)
+  * Switch from QNetwork to net-cpp (LP: #1409995)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 23 Jan 2015 15:19:37 +0000
+
 unity-scopes-api (0.6.9+15.04.20150120~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Pawel Stolowski ]
