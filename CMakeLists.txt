@@ -60,7 +60,7 @@ else()
 endif()
 
 include(FindPkgConfig)
-find_package(Boost COMPONENTS system filesystem regex serialization thread log REQUIRED)
+find_package(Boost COMPONENTS system filesystem regex serialization REQUIRED)
 pkg_check_modules(UNITY_API libunity-api>=0.1.3 REQUIRED)
 pkg_check_modules(PROCESS_CPP process-cpp>=1.0.1 REQUIRED)
 pkg_check_modules(APPARMOR REQUIRED libapparmor REQUIRED)
@@ -114,7 +114,7 @@ else()
     if (NOT DOS2UNIX_COMMAND)
         message(WARNING "Cannot find dos2unix: formatcode target will not be available")
     else()
-        find_program(CLANG_FORMAT_COMMAND NAMES clang-format-3.6 clang-format-3.5)
+        find_program(CLANG_FORMAT_COMMAND NAMES clang-format-3.5)
         if (NOT CLANG_FORMAT_COMMAND)
             message(WARNING "Cannot find clang-format >= clang-format-3.5: formatcode target will not be available")
         endif()
@@ -132,10 +132,6 @@ if(NOT CAPNPC_BIN)
   message(FATAL_ERROR "Capnp compiler not found.")
 endif()
 set(CAPNPC_FLAGS "" CACHE STRING "Extra flags for capnpc.")
-
-add_definitions(
-  -DDEB_HOST_MULTIARCH="${CMAKE_LIBRARY_ARCHITECTURE}"
-)
 
 set(OTHER_INCLUDE_DIRS ${OTHER_INCLUDE_DIRS} ${UNITY_API_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                        ${JSONCPP_INCLUDE_DIRS} ${PROCESS_CPP_INCLUDE_DIRS} ${APPARMOR_INCLUDE_DIRS}
@@ -171,12 +167,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wno-variadic-macros -Wextra
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=default")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pedantic -Wall -Wextra")
-
-# Some additional warnings not included by the general flags set above.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wformat -Wold-style-cast -Wredundant-decls -Wswitch-default")
-
-# TODO: Once AbstractScopeBase gets its virtual destructor, turn on the line below (bug #1360266).
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra") # Can't use -std=c++11 with C compiler
 
@@ -216,6 +206,12 @@ else()
     message(FATAL_ERROR "Invalid SANITIZER setting: ${SANITIZER}")
 endif()
 
+option(IPC_MONITORING "Enable IPC traffic monitoring")
+
+if(IPC_MONITORING)
+    add_definitions(-DENABLE_IPC_MONITOR)
+endif()
+
 # Scopes library name. Also used as a prefix in various places, and as a subdirectory
 # name for installed files. Changing this will also require corresponding changes
 # to the debian files.
@@ -224,7 +220,7 @@ set(UNITY_SCOPES_LIB unity-scopes)
 # API version
 set(UNITY_SCOPES_MAJOR 0)
 set(UNITY_SCOPES_MINOR 6)
-set(UNITY_SCOPES_MICRO 11)
+set(UNITY_SCOPES_MICRO 9)
 set(UNITY_SCOPES_SOVERSION 3)
 
 # Version for testing, with all symbols visible
