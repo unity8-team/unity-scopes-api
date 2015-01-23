@@ -429,7 +429,7 @@ SearchHandle::UPtr SmartScopesClient::search(SearchReplyHandler const& handler,
         }
         catch (std::exception const &e)
         {
-            BOOST_LOG_SEV(logger_, Logger::Error) << "SmartScopesClient.search(): Failed to parse: " << e.what();
+            std::cerr << "Failed to parse: " << e.what() << std::endl;
         }
     }, headers);
 
@@ -495,7 +495,7 @@ PreviewHandle::UPtr SmartScopesClient::preview(PreviewReplyHandler const& handle
         }
         catch (std::exception const &e)
         {
-            BOOST_LOG_SEV(logger_, Logger::Error) << "SmartScopesClient.preview(): Failed to parse: " << e.what();
+            std::cerr << "Failed to parse: " << e.what() << std::endl;
         }
     }, headers);
 
