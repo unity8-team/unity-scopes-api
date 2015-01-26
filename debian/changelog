@@ -1,3 +1,15 @@
+unity-scopes-api (0.6.9+15.04.20150126~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ CI Train Bot ]
+  * Resync trunk
+  * Resync trunk
+  * Resync trunk
+
+  [ Marcus Tomlinson ]
+  * Embed scope ID into the OA details of a log-in item (LP: #1414560)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 26 Jan 2015 12:20:46 +0000
+
 unity-scopes-api (0.6.9+15.04.20150123.1~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Marcus Tomlinson ]
