@@ -20,8 +20,8 @@
 
 #include <unity/UnityExceptions.h>
 
-#include <core/net/http/client.h>
-#include <core/net/http/request.h>
+#include <core/net/http/streaming_client.h>
+#include <core/net/http/streaming_request.h>
 #include <core/net/http/response.h>
 #include <core/net/http/status.h>
 
@@ -102,7 +102,7 @@ struct CancellationRegistry
 
 HttpClientNetCpp::HttpClientNetCpp(unsigned int no_reply_timeout)
     : no_reply_timeout{no_reply_timeout},
-      client{http::make_client()},
+      client{http::make_streaming_client()},
       worker([this]() { client->run(); })
 {
 }
@@ -129,13 +129,14 @@ HttpResponseHandle::SPtr HttpClientNetCpp::get(std::string const& request_url,
     }
     http_config.header = http_header;
 
-    auto request = client->get(http_config);
+    auto request = client->streaming_get(http_config);
     request->set_timeout(std::chrono::milliseconds{no_reply_timeout});
 
     auto promise = std::make_shared<std::promise<void>>();
     std::shared_future<void> future(promise->get_future());
 
     auto id_and_cancelable = CancellationRegistry::instance().add();
+    auto tmp_data = std::make_shared<std::string>();
 
     request->async_execute(
                 http::Request::Handler()
@@ -170,7 +171,25 @@ HttpResponseHandle::SPtr HttpClientNetCpp::get(std::string const& request_url,
                     {
                         unity::ResourceException re(e.what());
                         promise->set_exception(std::make_exception_ptr(re));
-                    }));
+                    }),
+                    [tmp_data, line_data](const std::string& const_data)
+                    {
+                        // prepend any leftover data from the previous on_data() call
+                        std::string data = *tmp_data + const_data;
+
+                        // read data line-by-line calling line_data() for each
+                        auto newline_pos = 0;
+                        auto endline_pos = data.find('\n');
+                        while (endline_pos != std::string::npos)
+                        {
+                            line_data(data.substr(newline_pos, endline_pos - newline_pos));
+                            newline_pos = endline_pos + 1;
+                            endline_pos = data.find('\n', newline_pos);
+                        }
+
+                        // store the leftover data in tmp_data
+                        *tmp_data = data.substr(newline_pos, data.size() - newline_pos);
+                    });
 
     return std::make_shared<HttpResponseHandle>(
                 shared_from_this(),
