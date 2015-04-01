@@ -158,12 +158,12 @@ HttpResponseHandle::SPtr HttpClientNetCpp::get(std::string const& request_url,
                         }
                         else
                         {
-                            std::istringstream in(response.body);
-                            std::string line;
-                            while (std::getline(in, line))
-                            {
-                                line_data(line);
-                            }
+                            // std::istringstream in(response.body);
+                            // std::string line;
+                            // while (std::getline(in, line))
+                            // {
+                            //    line_data(line);
+                            //}
                             promise->set_value();
                         }
                     })
