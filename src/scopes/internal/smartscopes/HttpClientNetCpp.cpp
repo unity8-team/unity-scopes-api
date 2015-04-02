@@ -136,7 +136,6 @@ HttpResponseHandle::SPtr HttpClientNetCpp::get(std::string const& request_url,
     std::shared_future<void> future(promise->get_future());
 
     auto id_and_cancelable = CancellationRegistry::instance().add();
-    auto tmp_data = std::make_shared<std::string>();
 
     request->async_execute(
                 http::Request::Handler()
@@ -158,12 +157,6 @@ HttpResponseHandle::SPtr HttpClientNetCpp::get(std::string const& request_url,
                         }
                         else
                         {
-                            // std::istringstream in(response.body);
-                            // std::string line;
-                            // while (std::getline(in, line))
-                            // { 
-                            //    line_data(line);
-                            //}
                             promise->set_value();
                         }
                     })
@@ -172,10 +165,10 @@ HttpResponseHandle::SPtr HttpClientNetCpp::get(std::string const& request_url,
                         unity::ResourceException re(e.what());
                         promise->set_exception(std::make_exception_ptr(re));
                     }),
-                    [tmp_data, line_data](const std::string& const_data)
-                    { 
-                        line_data(const_data);                     
-                    });
+                [line_data](const std::string& const_data)
+                {    
+                    line_data(const_data);                     
+                });
 
     return std::make_shared<HttpResponseHandle>(
                 shared_from_this(),
