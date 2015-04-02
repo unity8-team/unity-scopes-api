@@ -472,18 +472,12 @@ SearchHandle::UPtr SmartScopesClient::search(SearchReplyHandler const& handler,
         headers.push_back(std::make_pair("User-Agent", user_agent_hdr));
     }
 
-    auto reponse_mutex = std::make_shared<std::mutex>();
-    query_results_[search_id] = http_client_->get(search_uri.str(), [this, handler, reponse_mutex](std::string const& line_data)
+    query_results_[search_id] = http_client_->get(search_uri.str(), [this, handler](std::string const& chunk)
     {
-        std::lock_guard<std::mutex> lock(*reponse_mutex);
-        try
+        handle_chunk(chunk, [this, handler](const std::string& line)
         {
-            parse_line(line_data, handler);
-        }
-        catch (std::exception const &e)
-        {
-            BOOST_LOG_SEV(logger_, Logger::Error) << "SmartScopesClient.search(): Failed to parse: " << e.what();
-        }
+            handle_line(line, handler);
+        });
     }, headers);
 
     return SearchHandle::UPtr(new SearchHandle(search_id, shared_from_this()));
@@ -540,24 +534,42 @@ PreviewHandle::UPtr SmartScopesClient::preview(PreviewReplyHandler const& handle
 
     BOOST_LOG_SEV(logger_, Logger::Info) << "SmartScopesClient.preview(): GET " << preview_uri.str();
 
-    auto reponse_mutex = std::make_shared<std::mutex>();
-    query_results_[preview_id] = http_client_->get(preview_uri.str(), [this, handler, reponse_mutex](std::string const& line_data)
+    query_results_[preview_id] = http_client_->get(preview_uri.str(), [this, handler](std::string const& chunk)
     {
-        std::lock_guard<std::mutex> lock(*reponse_mutex);
-        try
+        handle_chunk(chunk, [this, handler](const std::string& line)
         {
-            parse_line(line_data, handler);
-        }
-        catch (std::exception const &e)
-        {
-            BOOST_LOG_SEV(logger_, Logger::Error) << "SmartScopesClient.preview(): Failed to parse: " << e.what();
-        }
+            handle_line(line, handler);
+        });        
     }, headers);
 
     return PreviewHandle::UPtr(new PreviewHandle(preview_id, shared_from_this()));
 }
 
-void SmartScopesClient::parse_line(std::string const& json, PreviewReplyHandler const& handler)
+void SmartScopesClient::handle_chunk(const std::string& chunk, std::function<void(const std::string&)> line_handler)
+{
+    // According to the docs, we expect: 
+    // The response will have Content-Type
+    // application/json, it will be a chunked response, in practice a series of
+    // “\r\n” delimited lines, each containing one JSON object, with the
+    // possible forms, matching what currently can be pushed into a reply in the
+    // new scopes API
+    static constexpr const char separator{'\n'};
+
+    std::istringstream ss{chunk}; std::string line;
+    while (std::getline(ss, line, separator))
+    {
+        try
+        {
+            line_handler(line);
+        }
+        catch (std::exception const &e)
+        {
+            BOOST_LOG_SEV(logger_, Logger::Error) << "SmartScopesClient.handle_chunk(): Failed to parse line: " << e.what();
+        }
+    }        
+}
+
+void SmartScopesClient::handle_line(std::string const& json, PreviewReplyHandler const& handler)
 {
     JsonNodeInterface::SPtr root_node;
     JsonNodeInterface::SPtr child_node;
@@ -605,7 +617,7 @@ void SmartScopesClient::parse_line(std::string const& json, PreviewReplyHandler 
     }
 }
 
-void SmartScopesClient::parse_line(std::string const& json, SearchReplyHandler const& handler)
+void SmartScopesClient::handle_line(std::string const& json, SearchReplyHandler const& handler)
 {
     JsonNodeInterface::SPtr root_node;
     JsonNodeInterface::SPtr child_node;
@@ -667,7 +679,7 @@ void SmartScopesClient::parse_line(std::string const& json, SearchReplyHandler c
             }
         }
         handler.result_handler(result);
-    }
+    }    
     else if (root_node->has_node("departments"))
     {
         auto departments = parse_departments(root_node->get_node("departments"));
@@ -720,6 +732,7 @@ void SmartScopesClient::wait_for_search(unsigned int search_id)
 std::shared_ptr<DepartmentInfo> SmartScopesClient::parse_departments(JsonNodeInterface::SPtr node)
 {
     static std::array<std::string, 2> const mandatory = { { "label", "canned_query" } };
+    
     for (auto const& field : mandatory)
     {
         if (!node->has_node(field))

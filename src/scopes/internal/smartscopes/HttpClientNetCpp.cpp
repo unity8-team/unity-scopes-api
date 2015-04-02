@@ -173,23 +173,8 @@ HttpResponseHandle::SPtr HttpClientNetCpp::get(std::string const& request_url,
                         promise->set_exception(std::make_exception_ptr(re));
                     }),
                     [tmp_data, line_data](const std::string& const_data)
-                    {
-                        line_data(const_data);
-                        // prepend any leftover data from the previous on_data() call
-                        std::string data = *tmp_data + const_data;
-
-                        // read data line-by-line calling line_data() for each
-                        //auto newline_pos = 0;
-                        //auto endline_pos = data.find('\n');
-                        //while (endline_pos != std::string::npos)
-                        //{
-                        //    line_data(data.substr(newline_pos, endline_pos - newline_pos));
-                        //    newline_pos = endline_pos + 1;
-                        //    endline_pos = data.find('\n', newline_pos);
-                        //}
-
-                        // store the leftover data in tmp_data
-                        //*tmp_data = data.substr(newline_pos, data.size() - newline_pos);
+                    { 
+                        line_data(const_data);                     
                     });
 
     return std::make_shared<HttpResponseHandle>(
