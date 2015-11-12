@@ -1,3 +1,4 @@
+usr/lib/*.dump
 usr/lib/*/libunity-scopes.so.*
 usr/lib/*/unity-scopes
 usr/lib/*/unity-scopes/scoperegistry
