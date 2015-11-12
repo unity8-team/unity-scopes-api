@@ -13,5 +13,6 @@ configure_file(Version.h.in Version.h)
 set(headers ${headers} ${CMAKE_CURRENT_BINARY_DIR}/Version.h)
 
 install(FILES ${headers} DESTINATION ${HDR_INSTALL_DIR}/unity/scopes)
+set(UNITY_SCOPES_LIB_PUBLIC_HDRS ${UNITY_SCOPES_LIB_PUBLIC_HDRS} ${headers} PARENT_SCOPE)
 
 set(UNITY_SCOPES_LIB_HDRS ${UNITY_SCOPES_LIB_HDRS} ${headers} PARENT_SCOPE)

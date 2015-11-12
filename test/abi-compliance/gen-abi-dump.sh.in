@@ -39,14 +39,8 @@ distro=$(lsb_release -c -s)
 }
 
 # Make a file containing the list of public headers.
-dirs="scopes scopes/testing scopes/utility"
 hdr_list=@CMAKE_CURRENT_BINARY_DIR@/headers.@UNITY_SCOPES_FULL_VERSION@
->$hdr_list
-for d in $dirs
-do
-    ls @CMAKE_SOURCE_DIR@/include/unity/${d}/*.h >>$hdr_list
-    ls @CMAKE_BINARY_DIR@/include/unity/${d}/*.h >>$hdr_list 2>/dev/null  # Not all subdirs use generated headers
-done
+echo "@UNITY_SCOPES_LIB_PUBLIC_HDRS@" | tr ';' '\n' >${hdr_list}
 
 # Dump the current ABI.
 abi-dumper -skip-cxx -public-headers $hdr_list -lver @UNITY_SCOPES_FULL_VERSION@ ${libpath} -o $1
