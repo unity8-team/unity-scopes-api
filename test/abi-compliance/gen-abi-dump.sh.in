@@ -20,6 +20,14 @@
 
 # Script to dump the current ABI.
 
+progname=$(basename $0)
+
+echo "$@"
+[ $# -ne 1 ] && {
+    echo "usage: $progname output_file" 2>&1
+    exit 2
+}
+
 libname=lib@UNITY_SCOPES_LIB@
 libpath=@CMAKE_BINARY_DIR@/${libname}.so
 cur_abi=@CMAKE_CURRENT_BINARY_DIR@/abi_dumps/${libname}/${libname}_@UNITY_SCOPES_FULL_VERSION@.dump
@@ -41,6 +49,6 @@ do
 done
 
 # Dump the current ABI.
-abi-dumper -skip-cxx -public-headers $hdr_list -lver @UNITY_SCOPES_FULL_VERSION@ ${libpath} -o ${cur_abi}
+abi-dumper -skip-cxx -public-headers $hdr_list -lver @UNITY_SCOPES_FULL_VERSION@ ${libpath} -o $1
 
 exit $?

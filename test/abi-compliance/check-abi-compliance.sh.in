@@ -26,6 +26,11 @@
 
 progname=$(basename $0)
 
+[ $# -ne 1 ] && {
+    echo "usage: $progname input_file" 2>&1
+    exit 2
+}
+
 distro=$(lsb_release -c -s)
 [ "$distro" = "vivid" ] && {
     echo "${progname}: Distribution is ${distro}, skipping ABI compliance check."
@@ -35,10 +40,9 @@ distro=$(lsb_release -c -s)
 libname=lib@UNITY_SCOPES_LIB@
 
 base_abi=@CMAKE_CURRENT_SOURCE_DIR@/abi_dumps/@CMAKE_LIBRARY_ARCHITECTURE@/${libname}_@UNITY_SCOPES_MAJOR@.@UNITY_SCOPES_MINOR@.dump
-cur_abi=@CMAKE_CURRENT_BINARY_DIR@/abi_dumps/${libname}/${libname}_@UNITY_SCOPES_FULL_VERSION@.dump
 
 # Compare against the base ABI.
-abi-compliance-checker -lib ${libname} -old $base_abi -new $cur_abi
+abi-compliance-checker -lib ${libname} -old $base_abi -new $1
 
 status=$?
 report=@CMAKE_CURRENT_BINARY_DIR@/compat_reports/${libname}/1.0.0_to_@UNITY_SCOPES_FULL_VERSION@/compat_report.html
