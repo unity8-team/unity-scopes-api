@@ -1,5 +1,3 @@
-usr/lib/*/*.dump
-var/lib/libunity-scopes/version
 usr/lib/*/libunity-scopes.so.*
 usr/lib/*/unity-scopes
 usr/lib/*/unity-scopes/scoperegistry

@@ -37,8 +37,6 @@ distro=$(lsb_release -c -s)
     exit 0
 }
 
-exit 0
-
 libname=lib@UNITY_SCOPES_LIB@
 
 base_abi=@CMAKE_CURRENT_SOURCE_DIR@/abi_dumps/@CMAKE_LIBRARY_ARCHITECTURE@/${libname}_@UNITY_SCOPES_MAJOR@.@UNITY_SCOPES_MINOR@.dump
