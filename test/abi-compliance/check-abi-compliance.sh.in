@@ -34,8 +34,8 @@ distro=$(lsb_release -c -s)
 
 libname=lib@UNITY_SCOPES_LIB@
 
-base_abi=@CMAKE_CURRENT_SOURCE_DIR@/abi_dumps/@CMAKE_LIBRARY_ARCHITECTURE@/${libname}_@UNITY_SCOPES_MAJOR_MINOR@.0.abi.tar.gz
-cur_abi=@CMAKE_CURRENT_BINARY_DIR@/abi_dumps/${libname}/${libname}_@UNITY_SCOPES_FULL_VERSION@.abi.tar.gz
+base_abi=@CMAKE_CURRENT_SOURCE_DIR@/abi_dumps/@CMAKE_LIBRARY_ARCHITECTURE@/${libname}_@UNITY_SCOPES_MAJOR@.@UNITY_SCOPES_MINOR@.dump
+cur_abi=@CMAKE_CURRENT_BINARY_DIR@/abi_dumps/${libname}/${libname}_@UNITY_SCOPES_FULL_VERSION@.dump
 
 # Compare against the base ABI.
 abi-compliance-checker -lib ${libname} -old $base_abi -new $cur_abi
