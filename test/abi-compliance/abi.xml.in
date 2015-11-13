@@ -35,6 +35,7 @@ that already ensure that no public header includes an internal one.
 </gcc_options>
 
 <skip_namespaces>
+unity::scopes::experimental
 unity::scopes::internal
 unity::scopes::qt::internal
 unity::scopes::utility::internal

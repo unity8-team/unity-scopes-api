@@ -71,8 +71,8 @@ $VAR1 = {
                          'Version.h' => 1
                        },
           'Language' => 'C++',
-          'LibraryName' => 'libunity-scopes.so.1.0.2',
-          'LibraryVersion' => '1.0.2',
+          'LibraryName' => 'libunity-scopes.so.1.0.0',
+          'LibraryVersion' => '1.0.0',
           'NameSpaces' => {
                             'Json' => 1,
                             '__cxxabiv1' => 1,
@@ -19403,7 +19403,7 @@ $VAR1 = {
                                'zmq_strerror' => 'write@@GLIBC_2.4'
                              },
           'Symbols' => {
-                         'libunity-scopes.so.1.0.2' => {
+                         'libunity-scopes.so.1.0.0' => {
                                                          '_ZN5unity6scopes10ChildScopeC1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEERKNS0_13ScopeMetadataEbRKSt3setIS7_St4lessIS7_ESaIS7_EE' => 1,
                                                          '_ZN5unity6scopes10ChildScopeC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEERKNS0_13ScopeMetadataEbRKSt3setIS7_St4lessIS7_ESaIS7_EE' => 1,
                                                          '_ZN5unity6scopes10ChildScopeD1Ev' => 1,
@@ -55071,7 +55071,7 @@ $VAR1 = {
                                     }
                         },
           'UndefinedSymbols' => {
-                                  'libunity-scopes.so.1.0.2' => {
+                                  'libunity-scopes.so.1.0.0' => {
                                                                   '_ITM_deregisterTMCloneTable' => 0,
                                                                   '_ITM_registerTMCloneTable' => 0,
                                                                   '_Jv_RegisterClasses' => 0,
