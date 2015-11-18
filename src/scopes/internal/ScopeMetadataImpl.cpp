@@ -62,6 +62,7 @@ ScopeMetadataImpl::ScopeMetadataImpl(ScopeMetadataImpl const& other)
     , child_scope_ids_(other.child_scope_ids_)
     , version_(other.version_)
     , keywords_(other.keywords_)
+    , framework_major_(other.framework_major_)
 {
     if (other.art_)
     {
@@ -125,6 +126,7 @@ ScopeMetadataImpl& ScopeMetadataImpl::operator=(ScopeMetadataImpl const& rhs)
         version_ = rhs.version_;
         keywords_ = rhs.keywords_;
         is_aggregator_.reset(rhs.is_aggregator_ ? new bool(*rhs.is_aggregator_) : nullptr);
+        framework_major_ = rhs.framework_major_;
     }
     return *this;
 }
@@ -260,6 +262,11 @@ bool ScopeMetadataImpl::is_aggregator() const
     return false;
 }
 
+int ScopeMetadataImpl::framework_major() const
+{
+    return framework_major_;
+}
+
 void ScopeMetadataImpl::set_scope_id(std::string const& scope_id)
 {
     scope_id_ = scope_id;
@@ -340,6 +347,11 @@ void ScopeMetadataImpl::set_is_aggregator(bool is_aggregator)
     is_aggregator_.reset(new bool(is_aggregator));
 }
 
+void ScopeMetadataImpl::set_framework_major(int major_version)
+{
+    framework_major_ = major_version;
+}
+
 void ScopeMetadataImpl::set_child_scope_ids(std::vector<std::string> const& ids)
 {
     child_scope_ids_ = ids;
@@ -393,6 +405,7 @@ VariantMap ScopeMetadataImpl::serialize() const
     var["description"] = description_;
     var["author"] = author_;
     var["version"] = version_;
+    var["framework_major"] = framework_major_;
 
     // Optional fields
     if (art_)
@@ -509,6 +522,9 @@ void ScopeMetadataImpl::deserialize(VariantMap const& var)
 
     it = find_or_throw(var, "author");
     author_ = it->second.get_string();
+
+    it = find_or_throw(var, "framework_major");
+    framework_major_ = it->second.get_int();
 
     // Optional fields
 

@@ -61,6 +61,7 @@ public:
     int version() const;                                         // optional (default: 0)
     std::set<std::string> keywords() const;                      // optional (default: empty set)
     bool is_aggregator() const;                                  // optional (default: false)
+    int framework_major() const;                                 // optional (default: 14)
 
     void set_scope_id(std::string const& scope_id);
     void set_proxy(ScopeProxy const& proxy);
@@ -81,6 +82,7 @@ public:
     void set_version(int v);
     void set_keywords(std::set<std::string> const& keywords);
     void set_is_aggregator(bool is_aggregator);
+    void set_framework_major(int major_version);
 
     VariantMap serialize() const;
     void deserialize(VariantMap const& var);
@@ -109,6 +111,7 @@ private:
     int version_;
     std::set<std::string> keywords_;
     std::unique_ptr<bool> is_aggregator_;                 // Optional, hence a pointer
+    int framework_major_;
 };
 
 } // namespace internal

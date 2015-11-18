@@ -49,6 +49,7 @@ TEST(ScopeMetadataImpl, basic)
     mi->set_description("description");
     mi->set_author("author");
     mi->set_results_ttl_type(ScopeMetadata::ResultsTtlType::Medium);
+    mi->set_framework_major(33);
 
     // Keep a copy for tests below
     unique_ptr<ScopeMetadataImpl> mi2(new ScopeMetadataImpl(*mi));
@@ -147,6 +148,7 @@ TEST(ScopeMetadataImpl, basic)
     EXPECT_EQ(0, mi2->appearance_attributes().size());
     EXPECT_EQ(ScopeMetadata::ResultsTtlType::Medium, mi2->results_ttl_type());
     EXPECT_EQ(0, mi2->version());
+    EXPECT_EQ(33, mi2->framework_major());
 
     VariantMap attrs;
     attrs["foo"] = "bar";
@@ -207,6 +209,7 @@ TEST(ScopeMetadataImpl, basic)
     ti->set_child_scope_ids(vector<string>{"tmp abc", "tmp def"});
     ti->set_keywords(set<string>{"music", "video"});
     ti->set_is_aggregator(true);
+    ti->set_framework_major(72);
 
     // Check impl assignment operator
     ScopeMetadataImpl ci(&mw);
@@ -231,6 +234,7 @@ TEST(ScopeMetadataImpl, basic)
     EXPECT_EQ(99, ci.version());
     EXPECT_EQ((set<string>{"music", "video"}), ci.keywords());
     EXPECT_TRUE(ci.is_aggregator());
+    EXPECT_EQ(72, ci.framework_major());
 
     // Check public assignment operator
     auto tmp = ScopeMetadataImpl::create(move(ti));
@@ -334,11 +338,12 @@ TEST(ScopeMetadataImpl, serialize)
     mi->set_child_scope_ids({"com.foo.bar", "com.foo.baz"});
     mi->set_keywords({"news", "games"});
     mi->set_is_aggregator(false);
+    mi->set_framework_major(42);
 
     // Check that serialize() sets the map values correctly
     auto m = ScopeMetadataImpl::create(move(mi));
     auto var = m.serialize();
-    EXPECT_EQ(19u, var.size());
+    EXPECT_EQ(20u, var.size());
     EXPECT_EQ("scope_id", var["scope_id"].get_string());
     EXPECT_EQ("display_name", var["display_name"].get_string());
     EXPECT_EQ("description", var["description"].get_string());
@@ -363,6 +368,7 @@ TEST(ScopeMetadataImpl, serialize)
     EXPECT_EQ("games", var["keywords"].get_array()[0].get_string());
     EXPECT_EQ("news", var["keywords"].get_array()[1].get_string());
     EXPECT_FALSE(var["is_aggregator"].get_bool());
+    EXPECT_EQ(42, var["framework_major"].get_int());
 
     // Make another instance from the VariantMap and check its fields
     ScopeMetadataImpl c(var, &mw);
@@ -391,6 +397,7 @@ TEST(ScopeMetadataImpl, serialize)
     EXPECT_NE(c.keywords().end(), c.keywords().find("news"));
     EXPECT_NE(c.keywords().end(), c.keywords().find("games"));
     EXPECT_FALSE(c.is_aggregator());
+    EXPECT_EQ(42, c.framework_major());
 }
 
 TEST(ScopeMetadataImpl, serialize_exceptions)
@@ -565,6 +572,20 @@ TEST(ScopeMetadataImpl, deserialize_exceptions)
     }
 
     m["author"] = "author";
+    try
+    {
+        ScopeMetadataImpl mi(m, &mw);
+        mi.deserialize(m);
+        FAIL();
+    }
+    catch (InvalidArgumentException const&e)
+    {
+        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadata::deserialize(): required attribute "
+                     "'framework_major' is missing",
+                     e.what());
+    }
+
+    m["framework_major"] = 15;
     m["results_ttl_type"] = -1;
     try
     {
