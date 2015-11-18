@@ -217,7 +217,7 @@ void ConfigBase::check_unknown_entries(KnownEntries const& known_entries) const
     }
 }
 
-void ConfigBase::to_lower(string & str)
+void ConfigBase::to_lower(string& str)
 {
     locale locale("");
     const ctype<char>& ct = use_facet<ctype<char> >(locale);

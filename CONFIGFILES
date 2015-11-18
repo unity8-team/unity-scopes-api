@@ -290,6 +290,13 @@ The following keys are recognized:
 
   The default value is "$HOME/.local/share/unity-scopes".
 
+- LXC.ExecCommand
+
+  The command to execute a scope inside the LXC container.
+
+  // TODO: Adjust this once the final container name is known.
+  The default value is "/usr/bin/lxc-attach -n vivid --".
+
 - Process.Timeout
 
   This parameter determines how long the registry will wait for a scope

@@ -35,6 +35,13 @@ public:
     {
     }
 
+    string lower(string const& s)
+    {
+        string lower_s = s;
+        to_lower(lower_s);
+        return lower_s;
+    }
+
     void error()
     {
         throw_ex("error");
@@ -49,6 +56,21 @@ TEST(ConfigBase, basic)
     EXPECT_TRUE(c.parser().get());
 }
 
+TEST(ConfigBase, optional_int)
+{
+    MyConfig c(TEST_INI);
+    EXPECT_EQ(99, c.get_optional_int("SomeGroup", "NoSuchKey", 99));
+    EXPECT_EQ(42, c.get_optional_int("SomeGroup", "The.Answer", 99));
+}
+
+TEST(ConfigBase, non_optional_int)
+{
+    MyConfig c(TEST_INI);
+    EXPECT_EQ(42, c.get_int("SomeGroup", "The.Answer"));
+    EXPECT_THROW(c.get_int("SomeGroup", "NoSuchKey"), unity::LogicException);
+}
+
+
 TEST(ConfigBase, optional_string)
 {
     MyConfig c(TEST_INI);
@@ -59,6 +81,7 @@ TEST(ConfigBase, optional_string)
 TEST(ConfigBase, non_optional_string)
 {
     MyConfig c(TEST_INI);
+    EXPECT_EQ("Foo", c.get_string("SomeGroup", "String.Foo"));
     try
     {
         c.get_string("SomeGroup", "Empty");
@@ -68,6 +91,12 @@ TEST(ConfigBase, non_optional_string)
     {
         EXPECT_EQ("unity::scopes::ConfigException: \"" + TEST_INI + "\": Illegal empty value for Empty", e.what());
     }
+}
+
+TEST(ConfigBase, to_lower)
+{
+    MyConfig c(TEST_INI);
+    EXPECT_EQ("abab !", c.lower("abAB !"));
 }
 
 TEST(ConfigBase, middleware)

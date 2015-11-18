@@ -4,6 +4,9 @@ Zmq.Middleware = Zmq
 REST.Middleware = REST
 Zmq.BadMiddleware = foo
 REST.BadMiddleware = bar
+String.Array = abc; foo bar ;xyz
+The.Answer = 42
+String.Foo = Foo
 
 [SomeOtherGroup]
 SomeString = foo

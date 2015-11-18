@@ -41,6 +41,7 @@ public:
     std::string scope_installdir() const;       // Directory for Canonical scopes
     std::string oem_installdir() const;         // Directory for OEM scope config files
     std::string click_installdir() const;       // Directory for Click scope config files
+    std::string lxc_exec_command() const;       // Path to the tool to run a command inside the container
     std::string scoperunner_path() const;       // Path to scoperunner binary
     int process_timeout() const;                // Milliseconds to wait before scope is considereed non-responsive.
 
@@ -51,6 +52,7 @@ private:
     std::string scope_installdir_;
     std::string oem_installdir_;
     std::string click_installdir_;
+    std::string lxc_exec_command_;
     std::string scoperunner_path_;
     int process_timeout_;                       // Milliseconds
 };

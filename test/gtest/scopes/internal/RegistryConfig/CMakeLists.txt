@@ -1,4 +1,5 @@
 configure_file(Registry.ini.in Registry.ini)
+configure_file(BadTimeout.ini.in BadTimeout.ini)
 configure_file(ScoperunnerRelativePath.ini.in ScoperunnerRelativePath.ini)
 
 add_definitions(-DTEST_REGISTRY_PATH="${CMAKE_CURRENT_BINARY_DIR}/Registry.ini")

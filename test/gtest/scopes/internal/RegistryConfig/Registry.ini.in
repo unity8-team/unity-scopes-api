@@ -1,6 +1,7 @@
 [Registry]
 Middleware = Zmq
 Zmq.ConfigFile = Zmq.ini
-Scope.InstallDir = /SomeDir
+Scope.InstallDir = /InstallDir
+OEM.InstallDir = /OEMDir
 Scoperunner.Path = /SomeAbsolutePath
 Process.Timeout = 3000

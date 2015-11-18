@@ -43,6 +43,7 @@ namespace
     const string scope_installdir_key = "Scope.InstallDir";
     const string oem_installdir_key = "OEM.InstallDir";
     const string click_installdir_key = "Click.InstallDir";
+    const string lxc_exec_command_key = "LXC.ExecCommand";
     const string scoperunner_path_key = "Scoperunner.Path";
     const string process_timeout_key = "Process.Timeout";
 }
@@ -65,6 +66,7 @@ RegistryConfig::RegistryConfig(string const& identity, string const& configfile)
         }
         click_installdir_ = string(home) + "/.local/share/unity-scopes/";
     }
+    lxc_exec_command_ = get_optional_string(registry_config_group, lxc_exec_command_key, DFLT_LXC_EXEC_COMMAND);
     scoperunner_path_ = get_optional_string(registry_config_group, scoperunner_path_key, DFLT_SCOPERUNNER_PATH);
     if (scoperunner_path_[0] != '/')
     {
@@ -84,6 +86,7 @@ RegistryConfig::RegistryConfig(string const& identity, string const& configfile)
                                                 scope_installdir_key,
                                                 oem_installdir_key,
                                                 click_installdir_key,
+                                                lxc_exec_command_key,
                                                 scoperunner_path_key,
                                                 process_timeout_key
                                              }
@@ -124,6 +127,11 @@ string RegistryConfig::oem_installdir() const
 string RegistryConfig::click_installdir() const
 {
     return click_installdir_;
+}
+
+string RegistryConfig::lxc_exec_command() const
+{
+    return lxc_exec_command_;
 }
 
 string RegistryConfig::scoperunner_path() const

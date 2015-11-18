@@ -20,6 +20,7 @@
 #include <unity/UnityExceptions.h>
 #include <unity/scopes/ScopeExceptions.h>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>  // Use Boost implementation until http://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631 is fixed.
 #include <gtest/gtest.h>
 
@@ -34,6 +35,11 @@ TEST(RegistryConfig, basic)
     EXPECT_EQ("Registry", c.identity());
     EXPECT_EQ("Zmq", c.mw_kind());
     EXPECT_EQ("Zmq.ini", c.mw_configfile());
+    EXPECT_EQ("/InstallDir", c.scope_installdir());
+    EXPECT_EQ("/OEMDir", c.oem_installdir());
+    EXPECT_TRUE(boost::ends_with(c.click_installdir(), "/unity-scopes/"));
+    EXPECT_EQ("lxc-attach -n vivid --", c.lxc_exec_command());
+    EXPECT_EQ("/SomeAbsolutePath", c.scoperunner_path());
     EXPECT_EQ(3000, c.process_timeout());
 }
 
@@ -70,6 +76,21 @@ TEST(RegistryConfig, ScoperunnerRelativePath)
     {
         EXPECT_STREQ("unity::scopes::ConfigException: ScoperunnerRelativePath.ini: Scoperunner.Path "
                      "must be an absolute path",
+                     e.what());
+    }
+}
+
+TEST(RegistryConfig, BadTimeout)
+{
+    try
+    {
+        RegistryConfig c("Registry", "BadTimeout.ini");
+        FAIL();
+    }
+    catch (ConfigException const& e)
+    {
+        EXPECT_STREQ("unity::scopes::ConfigException: \"BadTimeout.ini\": Illegal value (5) for Process.Timeout: "
+                     "value must be 10-15000 ms",
                      e.what());
     }
 }
