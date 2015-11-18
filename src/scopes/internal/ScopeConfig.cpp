@@ -23,6 +23,7 @@
 #include <unity/UnityExceptions.h>
 #include <unity/scopes/internal/Utils.h>
 
+#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 #include <algorithm>
@@ -56,6 +57,7 @@ namespace
     const string location_data_needed_key = "LocationDataNeeded";
     const string scoperunner_key = "ScopeRunner";
     const string idle_timeout_key = "IdleTimeout";
+    const string framework_key = "Framework";                       // Anything > 15.04 means gcc 5 ABI
     const string results_ttl_key = "ResultsTtlType";
     const string debug_mode_key = "DebugMode";                      // Deliberately undocumented
     const string child_scope_ids_key = "ChildScopes";               // Deprecated
@@ -174,6 +176,36 @@ ScopeConfig::ScopeConfig(string const& configfile) :
 
     idle_timeout_ = get_optional_int(scope_config_group, idle_timeout_key, DFLT_SCOPE_IDLE_TIMEOUT);
 
+    // Framework must be of the form <number>.<something>
+    framework_ = get_optional_string(scope_config_group, framework_key, DFLT_FRAMEWORK);
+    {
+        vector<string> parts;
+        boost::split(parts, framework_, boost::is_any_of("."));
+        if (parts.size() < 2)
+        {
+            throw_ex("Illegal value (" + framework_ + ") for " + framework_key + ": missing '.' separator");
+        }
+        size_t pos = string::npos;
+        try
+        {
+            framework_major_ = std::stoi(parts[0], &pos);
+            if (framework_major_ < 14)
+            {
+                throw_ex("Illegal value (" + framework_ + ") for " + framework_key + ": " +
+                         " major version must be at least 14");
+            }
+        }
+        catch (std::exception const& e)
+        {
+            throw_ex("Illegal value (" + framework_ + ") for " + framework_key + ": not a number");
+        }
+        if (pos != parts[0].size())
+        {
+            throw_ex("Illegal value (" + framework_ + ") for " + framework_key + ": not a number");
+        }
+    }
+
+
     // Negative values and values greater than max int (once multiplied by 1000 (s to ms)) are illegal
     const int max_idle_timeout = std::numeric_limits<int>::max() / 1000;
     if ((idle_timeout_ < 0 || idle_timeout_ > max_idle_timeout) && idle_timeout_ != -1)
@@ -270,6 +302,15 @@ ScopeConfig::ScopeConfig(string const& configfile) :
 
     try
     {
+        is_aggregator_ = parser()->get_boolean(scope_config_group, is_aggregator_key);
+    }
+    catch (LogicException const&)
+    {
+        is_aggregator_ = false;
+    }
+
+    try
+    {
         debug_mode_ = parser()->get_boolean(scope_config_group, debug_mode_key);
     }
     catch (LogicException const&)
@@ -304,6 +345,7 @@ ScopeConfig::ScopeConfig(string const& configfile) :
                location_data_needed_key,
                scoperunner_key,
                idle_timeout_key,
+               framework_key,
                results_ttl_key,
                debug_mode_key,
                child_scope_ids_key,
@@ -466,6 +508,16 @@ string ScopeConfig::scope_runner() const
 int ScopeConfig::idle_timeout() const
 {
     return idle_timeout_;
+}
+
+string ScopeConfig::framework() const
+{
+    return framework_;
+}
+
+int ScopeConfig::framework_major() const
+{
+    return framework_major_;
 }
 
 ScopeMetadata::ResultsTtlType ScopeConfig::results_ttl_type() const

@@ -13,6 +13,7 @@ HotKey = a key
 Invisible = true
 ScopeRunner = custom runner
 IdleTimeout = 300
+Framework = 16.04
 ResultsTtlType = large
 LocationDataNeeded = true
 ConfinementType = unconfined

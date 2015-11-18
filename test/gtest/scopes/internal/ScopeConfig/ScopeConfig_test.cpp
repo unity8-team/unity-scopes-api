@@ -46,6 +46,8 @@ TEST(ScopeConfig, basic)
         EXPECT_TRUE(cfg.invisible());
         EXPECT_EQ("custom runner", cfg.scope_runner());
         EXPECT_EQ(300, cfg.idle_timeout());
+        EXPECT_EQ("16.04", cfg.framework());
+        EXPECT_EQ(16, cfg.framework_major());
         EXPECT_EQ(ScopeMetadata::ResultsTtlType::Large, cfg.results_ttl_type());
         EXPECT_TRUE(cfg.location_data_needed());
         EXPECT_TRUE(cfg.debug_mode());
@@ -91,6 +93,8 @@ TEST(ScopeConfig, basic)
 
         EXPECT_FALSE(cfg.invisible());
         EXPECT_EQ(DFLT_SCOPE_IDLE_TIMEOUT, cfg.idle_timeout());
+        EXPECT_EQ("15.04", cfg.framework());
+        EXPECT_EQ(15, cfg.framework_major());
         EXPECT_EQ(ScopeMetadata::ResultsTtlType::None, cfg.results_ttl_type());
         EXPECT_FALSE(cfg.location_data_needed());
         EXPECT_FALSE(cfg.debug_mode());
@@ -253,6 +257,64 @@ TEST(ScopeConfig, empty_author)
     catch(ConfigException const& e)
     {
         boost::regex r("unity::scopes::ConfigException: \".*\": Author cannot be empty or whitespace only");
+        EXPECT_TRUE(boost::regex_match(e.what(), r));
+    }
+}
+
+TEST(ScopeConfig, framework_no_parse)
+{
+    try
+    {
+        ScopeConfig cfg(FRAMEWORK_NO_PARSE);
+        FAIL();
+    }
+    catch(ConfigException const& e)
+    {
+        boost::regex r("unity::scopes::ConfigException: \".*\": Illegal value \\(abc\\) for Framework: missing '\\.' separator");
+        EXPECT_TRUE(boost::regex_match(e.what(), r));
+    }
+}
+
+TEST(ScopeConfig, framework_bad_version)
+{
+    try
+    {
+        ScopeConfig cfg(FRAMEWORK_BAD_VERSION);
+        FAIL();
+    }
+    catch(ConfigException const& e)
+    {
+        boost::regex r("unity::scopes::ConfigException: \".*\": Illegal value \\(13\\.10\\) for Framework:  major version must be at least 14");
+        EXPECT_TRUE(boost::regex_match(e.what(), r));
+    }
+}
+
+TEST(ScopeConfig, framework_not_a_number)
+{
+    try
+    {
+        ScopeConfig cfg(FRAMEWORK_NOT_A_NUMBER);
+        FAIL();
+    }
+    catch(ConfigException const& e)
+    {
+        boost::regex r("unity::scopes::ConfigException: \".*\": Illegal value \\(x\\.10\\) for Framework: not a number:.*");
+
+        EXPECT_TRUE(boost::regex_match(e.what(), r));
+    }
+}
+
+TEST(ScopeConfig, framework_trailing_chars)
+{
+    try
+    {
+        ScopeConfig cfg(FRAMEWORK_TRAILING_CHARS);
+        FAIL();
+    }
+    catch(ConfigException const& e)
+    {
+        boost::regex r("unity::scopes::ConfigException: \".*\": Illegal value \\(15x\\.10\\) for Framework: not a number");
+
         EXPECT_TRUE(boost::regex_match(e.what(), r));
     }
 }
