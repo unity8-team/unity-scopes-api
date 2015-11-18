@@ -49,7 +49,6 @@ TEST(ScopeMetadataImpl, basic)
     mi->set_description("description");
     mi->set_author("author");
     mi->set_results_ttl_type(ScopeMetadata::ResultsTtlType::Medium);
-    mi->set_framework_major(33);
 
     // Keep a copy for tests below
     unique_ptr<ScopeMetadataImpl> mi2(new ScopeMetadataImpl(*mi));
@@ -148,7 +147,6 @@ TEST(ScopeMetadataImpl, basic)
     EXPECT_EQ(0, mi2->appearance_attributes().size());
     EXPECT_EQ(ScopeMetadata::ResultsTtlType::Medium, mi2->results_ttl_type());
     EXPECT_EQ(0, mi2->version());
-    EXPECT_EQ(33, mi2->framework_major());
 
     VariantMap attrs;
     attrs["foo"] = "bar";
@@ -169,9 +167,13 @@ TEST(ScopeMetadataImpl, basic)
     mi2->set_child_scope_ids(vector<string>{"abc", "def"});
     mi2->set_keywords(set<string>{"music", "video", "news"});
     mi2->set_is_aggregator(true);
+    mi2->set_version(11);
+    mi2->set_framework_major(33);
 
     // Make another copy, so we get coverage on the entire copy constructor
     unique_ptr<ScopeMetadataImpl> mi3(new ScopeMetadataImpl(*mi2));
+    EXPECT_EQ(11, mi3->version());
+    EXPECT_EQ(33, mi3->framework_major());
 
     // Check that optional fields are set correctly
     m = ScopeMetadataImpl::create(move(mi2));

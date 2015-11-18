@@ -39,6 +39,7 @@ ScopeMetadataImpl::ScopeMetadataImpl(MiddlewareBase* mw)
     : mw_(mw)
     , results_ttl_type_(ScopeMetadata::ResultsTtlType::None)
     , version_(0)
+    , framework_major_(14)
 {
 }
 
@@ -46,6 +47,7 @@ ScopeMetadataImpl::ScopeMetadataImpl(const VariantMap& variant_map, MiddlewareBa
     : mw_(mw)
     , results_ttl_type_(ScopeMetadata::ResultsTtlType::None)
     , version_(0)
+    , framework_major_(14)
 {
     deserialize(variant_map);
 }
