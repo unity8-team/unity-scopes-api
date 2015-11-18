@@ -349,6 +349,11 @@ void ScopeMetadataImpl::set_is_aggregator(bool is_aggregator)
 
 void ScopeMetadataImpl::set_framework_major(int major_version)
 {
+    if (major_version < 14)
+    {
+        throw InvalidArgumentException("ScopeMetadata::set_framework_major(): invalid version: " +
+                                       std::to_string(major_version));
+    }
     framework_major_ = major_version;
 }
 
@@ -523,9 +528,6 @@ void ScopeMetadataImpl::deserialize(VariantMap const& var)
     it = find_or_throw(var, "author");
     author_ = it->second.get_string();
 
-    it = find_or_throw(var, "framework_major");
-    framework_major_ = it->second.get_int();
-
     // Optional fields
 
     // Version was added in 0.6.8. When serializing, we always
@@ -539,6 +541,15 @@ void ScopeMetadataImpl::deserialize(VariantMap const& var)
     {
         throw InvalidArgumentException("ScopeMetadataImpl::deserialize(): invalid attribute 'version' with value "
                                        + std::to_string(version_));
+    }
+
+    // Framework_major was added in 1.0.3. Similar story as for version.
+    it = var.find("framework_major");
+    framework_major_ = it != var.end() ? it->second.get_int() : 14;
+    if (framework_major_ < 14)
+    {
+        throw InvalidArgumentException("ScopeMetadataImpl::deserialize(): invalid attribute 'framework_major' with value "
+                                       + std::to_string(framework_major_));
     }
 
     it = var.find("art");

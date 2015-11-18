@@ -400,6 +400,35 @@ TEST(ScopeMetadataImpl, serialize)
     EXPECT_EQ(42, c.framework_major());
 }
 
+TEST(ScopeMetadataImpl, setter_exceptions)
+{
+    auto rt = RuntimeImpl::create("testscope", runtime_ini);
+    ZmqMiddleware mw("testscope", rt.get(), zmq_ini);
+
+    ScopeMetadataImpl mi(&mw);
+
+    try
+    {
+        mi.set_version(-1);
+        FAIL();
+    }
+    catch (InvalidArgumentException const&e)
+    {
+        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadata::set_version(): invalid version: -1", e.what());
+    }
+
+    try
+    {
+        mi.set_framework_major(13);
+        FAIL();
+    }
+    catch (InvalidArgumentException const&e)
+    {
+        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadata::set_framework_major(): invalid version: 13",
+                     e.what());
+    }
+}
+
 TEST(ScopeMetadataImpl, serialize_exceptions)
 {
     auto rt = RuntimeImpl::create("testscope", runtime_ini);
@@ -570,37 +599,8 @@ TEST(ScopeMetadataImpl, deserialize_exceptions)
                      "'author' is missing",
                      e.what());
     }
-
     m["author"] = "author";
-    try
-    {
-        ScopeMetadataImpl mi(m, &mw);
-        mi.deserialize(m);
-        FAIL();
-    }
-    catch (InvalidArgumentException const&e)
-    {
-        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadata::deserialize(): required attribute "
-                     "'framework_major' is missing",
-                     e.what());
-    }
 
-    m["framework_major"] = 15;
-    m["results_ttl_type"] = -1;
-    try
-    {
-        ScopeMetadataImpl mi(m, &mw);
-        mi.deserialize(m);
-        FAIL();
-    }
-    catch (InvalidArgumentException const&e)
-    {
-        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadata::deserialize(): "
-                     "invalid attribute 'results_ttl_type' with value -1",
-                     e.what());
-    }
-
-    m["results_ttl_type"] = 0;
     m["version"] = -1;
     try
     {
@@ -615,6 +615,36 @@ TEST(ScopeMetadataImpl, deserialize_exceptions)
                      e.what());
     }
     m["version"] = 0;
+
+    m["framework_major"] = 5;
+    try
+    {
+        ScopeMetadataImpl mi(m, &mw);
+        mi.deserialize(m);
+        FAIL();
+    }
+    catch (InvalidArgumentException const&e)
+    {
+        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadataImpl::deserialize(): "
+                     "invalid attribute 'framework_major' with value 5",
+                     e.what());
+    }
+    m["framework_major"] = 14;
+
+    m["results_ttl_type"] = -1;
+    try
+    {
+        ScopeMetadataImpl mi(m, &mw);
+        mi.deserialize(m);
+        FAIL();
+    }
+    catch (InvalidArgumentException const&e)
+    {
+        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadata::deserialize(): "
+                     "invalid attribute 'results_ttl_type' with value -1",
+                     e.what());
+    }
+    m["results_ttl_type"] = 0;
 
     // Optional attributes
     m["art"] = "art";
