@@ -32,4 +32,5 @@ struct PushStateRequest
 {
     senderId @0 : Text;
     state @1 : State;
+    pid @2 : Int32;
 }

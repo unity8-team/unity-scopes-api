@@ -80,7 +80,7 @@ public:
 
 private:
     void on_process_death(core::posix::ChildProcess const& process);
-    void on_state_received(std::string const& scope_id, StateReceiverObject::State const& state);
+    void on_state_received(std::string const& scope_id, int pid, StateReceiverObject::State const& state);
 
     static std::string desktop_files_dir();
     void create_desktop_file(ScopeMetadata const& metadata);

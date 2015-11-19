@@ -460,7 +460,7 @@ void RuntimeImpl::run_scope(ScopeBase* scope_base,
         // Inform the registry that this scope is now ready to process requests
         {
             auto reg_state_receiver = mw->create_registry_state_receiver_proxy("StateReceiver");
-            reg_state_receiver->push_state(scope_id_, StateReceiverObject::State::ScopeReady);
+            reg_state_receiver->push_state(scope_id_, getpid(), StateReceiverObject::State::ScopeReady);
         }
 
         promise.set_value();
@@ -473,7 +473,7 @@ void RuntimeImpl::run_scope(ScopeBase* scope_base,
             auto sd_mw = sd_runtime->factory()->find(scope_id_ + "-shutdown", reg_conf.mw_kind());
             auto reg_state_receiver = sd_mw->create_registry_state_receiver_proxy("StateReceiver");
             // Inform the registry that this scope is shutting down
-            reg_state_receiver->push_state(scope_id_, StateReceiverObject::State::ScopeStopping);
+            reg_state_receiver->push_state(scope_id_, getpid(), StateReceiverObject::State::ScopeStopping);
         }
     }
     catch (...)

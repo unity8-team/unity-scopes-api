@@ -221,25 +221,15 @@ map<string, string> find_click_scopes(map<string, string> const& local_scopes, s
     return click_scopes;
 }
 
-static bool starts_with(const string& compare, const string& prefix)
-{
-    bool result = false;
-    if (compare.length() >= prefix.length())
-    {
-        result = (compare.compare(0, prefix.length(), prefix) == 0);
-    }
-    return result;
-}
-
 static bool is_uri(const string& path)
 {
     return starts_with(path, "color://")
-            || starts_with(path, "file://")
-            || starts_with(path, "ftp://")
-            || starts_with(path, "gradient://")
-            || starts_with(path, "http://")
-            || starts_with(path, "https://")
-            || starts_with(path, "image://");
+            || boost::starts_with(path, "file://")
+            || boost::starts_with(path, "ftp://")
+            || boost::starts_with(path, "gradient://")
+            || boost::starts_with(path, "http://")
+            || boost::starts_with(path, "https://")
+            || boost::starts_with(path, "image://");
 }
 
 void convert_relative_attribute(VariantMap& inner_map, const string& id, const filesystem::path& scope_dir)

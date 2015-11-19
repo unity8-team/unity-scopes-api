@@ -81,7 +81,8 @@ void StateReceiverI::push_state_(Current const&,
             assert(false);
         }
     }
-    delegate->push_state(sender_id, state);
+    auto pid = req.getPid();
+    delegate->push_state(sender_id, pid, state);
 }
 
 } // namespace zmq_middleware

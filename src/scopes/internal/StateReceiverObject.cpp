@@ -37,13 +37,13 @@ StateReceiverObject::~StateReceiverObject()
 {
 }
 
-void StateReceiverObject::push_state(std::string const& sender_id, State const& state)
+void StateReceiverObject::push_state(std::string const& sender_id, int pid, State const& state)
 {
     lock_guard<mutex> lock(mutex_);
-    state_received_(sender_id, state);
+    state_received_(sender_id, pid, state);
 }
 
-core::Signal<std::string, StateReceiverObject::State> const& StateReceiverObject::state_received() const
+core::Signal<std::string, int, StateReceiverObject::State> const& StateReceiverObject::state_received() const
 {
     lock_guard<mutex> lock(mutex_);
     return state_received_;

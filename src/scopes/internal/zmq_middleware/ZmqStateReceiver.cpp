@@ -57,7 +57,7 @@ ZmqStateReceiver::~ZmqStateReceiver()
 {
 }
 
-void ZmqStateReceiver::push_state(std::string const& sender_id, StateReceiverObject::State const& state)
+void ZmqStateReceiver::push_state(std::string const& sender_id, int pid, StateReceiverObject::State const& state)
 {
     capnp::MallocMessageBuilder request_builder;
     auto request = make_request_(request_builder, "push_state");
@@ -82,6 +82,7 @@ void ZmqStateReceiver::push_state(std::string const& sender_id, StateReceiverObj
     }
     in_params.setState(s);
     in_params.setSenderId(sender_id);
+    in_params.setPid(pid);
 
     auto future = mw_base()->oneway_pool()->submit([&] { return this->invoke_oneway_(request_builder); });
     future.get();

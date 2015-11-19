@@ -43,7 +43,7 @@ public:
                      std::string const& category);
     virtual ~ZmqStateReceiver();
 
-    void push_state(std::string const& sender_id, StateReceiverObject::State const& state) override;
+    void push_state(std::string const& sender_id, int pid, StateReceiverObject::State const& state) override;
 };
 
 } // namespace zmq_middleware

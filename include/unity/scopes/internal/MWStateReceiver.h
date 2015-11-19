@@ -33,7 +33,7 @@ namespace internal
 class MWStateReceiver : public virtual MWObjectProxy
 {
 public:
-    virtual void push_state(std::string const& sender_id, StateReceiverObject::State const& state) = 0;
+    virtual void push_state(std::string const& sender_id, int pid, StateReceiverObject::State const& state) = 0;
 
     virtual ~MWStateReceiver();
 

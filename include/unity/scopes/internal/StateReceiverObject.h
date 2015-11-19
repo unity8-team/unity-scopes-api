@@ -48,13 +48,13 @@ public:
     virtual ~StateReceiverObject();
 
     // Remote operation implementations
-    void push_state(std::string const& sender_id, State const& state);
+    void push_state(std::string const& sender_id, int pid, State const& state);
 
     // Local methods
-    core::Signal<std::string, State> const& state_received() const;
+    core::Signal<std::string, int, State> const& state_received() const;
 
 private:
-    core::Signal<std::string, State> state_received_;
+    core::Signal<std::string, int, State> state_received_;
     mutable std::mutex mutex_;
 };
 

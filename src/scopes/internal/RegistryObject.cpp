@@ -19,7 +19,6 @@
 #include <unity/scopes/internal/RegistryObject.h>
 
 #include <unity/scopes/internal/MWRegistry.h>
-#include <unity/scopes/internal/RuntimeImpl.h>
 #include <unity/scopes/internal/Utils.h>
 #include <unity/scopes/ScopeExceptions.h>
 #include <unity/UnityExceptions.h>
@@ -67,9 +66,10 @@ RegistryObject::RegistryObject(core::posix::ChildProcess::DeathObserver& death_o
       state_receiver_connection_
       {
           state_receiver_->state_received().connect([this](std::string const& id,
-                                                    StateReceiverObject::State const& s)
+                                                           int pid,
+                                                           StateReceiverObject::State const& s)
           {
-              on_state_received(id, s);
+              on_state_received(id, pid, s);
           })
       },
       executor_(executor),
@@ -362,7 +362,7 @@ void RegistryObject::on_process_death(core::posix::ChildProcess const& process)
     }
 }
 
-void RegistryObject::on_state_received(std::string const& scope_id, StateReceiverObject::State const& state)
+void RegistryObject::on_state_received(std::string const& scope_id, int pid, StateReceiverObject::State const& state)
 {
     lock_guard<decltype(mutex_)> lock(mutex_);
 
@@ -381,6 +381,7 @@ void RegistryObject::on_state_received(std::string const& scope_id, StateReceive
                 BOOST_LOG(logger_)
                     << "RegistryObject::on_state_received(): unknown state received from scope: " << scope_id;
         }
+        // TODO: store pid
     }
     // simply ignore states from scopes the registry does not know about
 }
