@@ -494,6 +494,7 @@ int main(int argc, char* argv[])
         string scope_installdir;
         string oem_installdir;
         string click_installdir;
+        string lxc_exec_command;
         string scoperunner_path;
         int process_timeout;
         {
@@ -502,6 +503,7 @@ int main(int argc, char* argv[])
             scope_installdir = c.scope_installdir();
             oem_installdir = c.oem_installdir();
             click_installdir = c.click_installdir();
+            lxc_exec_command = c.lxc_exec_command();
             scoperunner_path = c.scoperunner_path();
             process_timeout = c.process_timeout();
         } // Release memory for config parser
@@ -525,7 +527,11 @@ int main(int argc, char* argv[])
         // The registry object stores the local and remote scopes
         MiddlewareBase::SPtr middleware = runtime->factory()->find(identity, mw_kind);
         Executor::SPtr executor = std::make_shared<Executor>();
-        RegistryObject::SPtr registry(new RegistryObject(*signal_handler_wrapper.death_observer, executor, middleware, true));
+        RegistryObject::SPtr registry(new RegistryObject(*signal_handler_wrapper.death_observer,
+                                                         executor,
+                                                         middleware,
+                                                         lxc_exec_command,
+                                                         true));
 
         // Add the metadata for each scope to the lookup table.
         // We do this before starting any of the scopes, so aggregating scopes don't get a lookup failure if

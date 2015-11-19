@@ -130,7 +130,7 @@ protected:
 
     static void pretend_started(StateReceiverObject::SPtr receiver)
     {
-        receiver->push_state("scope-id", StateReceiverObject::State::ScopeReady);
+        receiver->push_state("scope-id", 99, StateReceiverObject::State::ScopeReady);
     }
 
     ScopeMetadata make_meta(const string& scope_id)
@@ -178,7 +178,7 @@ protected:
         exec_data.confinement_profile = confinement_profile;
         exec_data.timeout_ms = 1500;
 
-        registry.reset(new RegistryObject(*death_observer(), executor, nullptr));
+        registry.reset(new RegistryObject(*death_observer(), executor, nullptr, "container-cmd"));
         registry->add_local_scope("scope-id", meta, exec_data);
         registry->locate("scope-id");
         EXPECT_TRUE(registry->is_scope_running("scope-id"));

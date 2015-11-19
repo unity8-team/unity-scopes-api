@@ -44,7 +44,7 @@ public:
         // Run a test registry
         reg_rt_ = RuntimeImpl::create("TestRegistry", "Runtime.ini");
         auto reg_mw = reg_rt_->factory()->create("TestRegistry", "Zmq", "Zmq.ini");
-        auto reg_obj(std::make_shared<RegistryObject>(*death_observer, std::make_shared<Executor>(), reg_mw));
+        auto reg_obj(std::make_shared<RegistryObject>(*death_observer, std::make_shared<Executor>(), reg_mw, "dummy"));
         reg_mw->add_registry_object("TestRegistry", reg_obj);
 
         // Create a proxy to TestScope

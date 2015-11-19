@@ -73,7 +73,10 @@ RuntimeImpl::SPtr run_test_registry()
 {
     RuntimeImpl::SPtr runtime = RuntimeImpl::create("TestRegistry", TEST_DIR "/Runtime.ini");
     MiddlewareBase::SPtr middleware = runtime->factory()->create("TestRegistry", "Zmq", "Zmq.ini");
-    RegistryObject::SPtr reg_obj(std::make_shared<RegistryObject>(*death_observer, std::make_shared<Executor>(), middleware));
+    RegistryObject::SPtr reg_obj(std::make_shared<RegistryObject>(*death_observer,
+                                                                  std::make_shared<Executor>(),
+                                                                  middleware,
+                                                                  "dummy"));
     middleware->add_registry_object("TestRegistry", reg_obj);
     return runtime;
 }

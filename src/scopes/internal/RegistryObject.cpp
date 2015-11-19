@@ -52,6 +52,7 @@ BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(registry_object_test_logger, boost::log::
 RegistryObject::RegistryObject(core::posix::ChildProcess::DeathObserver& death_observer,
                                Executor::SPtr const& executor,
                                MiddlewareBase::SPtr middleware,
+                               string const& lxc_exec_command,
                                bool generate_desktop_files)
     : logger_(middleware ? middleware->runtime()->logger() : registry_object_test_logger::get()),
       death_observer_(death_observer),
@@ -73,6 +74,7 @@ RegistryObject::RegistryObject(core::posix::ChildProcess::DeathObserver& death_o
           })
       },
       executor_(executor),
+      lxc_exec_command_(lxc_exec_command),
       generate_desktop_files_(generate_desktop_files)
 {
     if (middleware)
@@ -300,7 +302,7 @@ bool RegistryObject::remove_local_scope(std::string const& scope_id)
     {
         try
         {
-            proc->kill();
+            proc->kill(); // TODO: Wrong process if in container
         }
         catch (...)
         {
@@ -352,6 +354,8 @@ void RegistryObject::on_process_death(core::posix::ChildProcess const& process)
     // The death observer has signaled that a child has died.
     // Broadcast this message to each scope process until we have found the process in question.
     // (This is slightly more efficient than just connecting the signal to every scope process.)
+
+    // TODO: wrong pid if in container
     pid_t pid = process.pid();
     for (auto& scope_process : scope_processes_)
     {
@@ -477,6 +481,7 @@ RegistryObject::ScopeProcess::~ScopeProcess()
 {
     try
     {
+        // TODO: make sure that's the right process
         kill();
     }
     catch(std::exception const& e)

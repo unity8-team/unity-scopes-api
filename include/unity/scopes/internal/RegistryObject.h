@@ -60,8 +60,11 @@ public:
     UNITY_DEFINES_PTRS(RegistryObject);
     NONCOPYABLE(RegistryObject);
 
-    RegistryObject(core::posix::ChildProcess::DeathObserver& death_observer, Executor::SPtr const& executor,
-                   MiddlewareBase::SPtr middleware, bool generate_desktop_files = false);
+    RegistryObject(core::posix::ChildProcess::DeathObserver& death_observer,
+                   Executor::SPtr const& executor,
+                   MiddlewareBase::SPtr middleware,
+                   std::string const& lxc_exec_command,
+                   bool generate_desktop_files = false);
     virtual ~RegistryObject();
 
     // Remote operation implementations
@@ -144,6 +147,7 @@ private:
     core::ScopedConnection state_receiver_connection_;
 
     Executor::SPtr executor_;
+    std::string lxc_exec_command_;
 
     MetadataMap scopes_;
     typedef std::map<std::string, std::shared_ptr<ScopeProcess>> ProcessMap;
