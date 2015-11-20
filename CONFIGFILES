@@ -295,7 +295,7 @@ The following keys are recognized:
   The command to execute a scope inside the LXC container.
 
   // TODO: Adjust this once the final container name is known.
-  The default value is "/usr/bin/lxc-attach -n vivid --".
+  The default value is "/usr/bin/lxc-attach -n vivid --keep-env --".
 
 - Process.Timeout
 
