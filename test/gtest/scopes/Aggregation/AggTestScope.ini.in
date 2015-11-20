@@ -2,3 +2,4 @@
 DisplayName = AggTestScope
 Description = Aggregator scope that makes various loops
 Author = Michi
+Framework = 15.04

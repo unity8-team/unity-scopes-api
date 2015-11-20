@@ -8,3 +8,4 @@ SearchHint = scope-B.SearchHint
 HotKey = scope-B.HotKey
 ScopeRunner = testscopeB "unused arg 1" %S %R unused' 'arg' '2 ./testscopeB.ini
 IdleTimeout = 2
+Framework = 16.04

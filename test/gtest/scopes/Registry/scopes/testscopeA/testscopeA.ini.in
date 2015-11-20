@@ -11,6 +11,7 @@ ChildScopes = com.foo.bar;com.foo.baz
 Version = 1
 Keywords = music;news;foo
 IsAggregator = false
+Framework = 16.04
 
 [Appearance]
 ForegroundColor = fg_color

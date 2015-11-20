@@ -6,3 +6,4 @@ Author = Canonical Ltd.
 Icon = scope-A.Icon
 SearchHint = scope-A.SearchHint
 HotKey = scope-A.HotKey
+Framework = 15.04

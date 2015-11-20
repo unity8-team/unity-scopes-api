@@ -8,3 +8,4 @@ SearchHint = scope-C.SearchHint
 HotKey = scope-C.HotKey
 IdleTimeout = 2
 DebugMode = true
+Framework = 15.04

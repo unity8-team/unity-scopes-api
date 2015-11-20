@@ -93,8 +93,8 @@ TEST(ScopeConfig, basic)
 
         EXPECT_FALSE(cfg.invisible());
         EXPECT_EQ(DFLT_SCOPE_IDLE_TIMEOUT, cfg.idle_timeout());
-        EXPECT_EQ("15.04", cfg.framework());
-        EXPECT_EQ(15, cfg.framework_major());
+        EXPECT_EQ("14.04", cfg.framework());
+        EXPECT_EQ(14, cfg.framework_major());
         EXPECT_EQ(ScopeMetadata::ResultsTtlType::None, cfg.results_ttl_type());
         EXPECT_FALSE(cfg.location_data_needed());
         EXPECT_FALSE(cfg.debug_mode());

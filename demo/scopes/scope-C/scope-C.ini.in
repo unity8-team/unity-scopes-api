@@ -2,3 +2,4 @@
 DisplayName = scope-C.DisplayName
 Description = scope-C.Description
 Author = Canonical Ltd.
+Framework = 15.04

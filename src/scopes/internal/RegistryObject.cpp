@@ -46,7 +46,7 @@ namespace scopes
 namespace internal
 {
 
-// Substitute logger for testing. (Some of tests mock out the middleware and run time.)
+// Substitute logger for testing. (Some of the tests mock out the middleware and run time.)
 BOOST_LOG_INLINE_GLOBAL_LOGGER_DEFAULT(registry_object_test_logger, boost::log::sources::severity_channel_logger_mt<>)
 
 RegistryObject::RegistryObject(core::posix::ChildProcess::DeathObserver& death_observer,
@@ -240,7 +240,8 @@ bool RegistryObject::is_scope_running(std::string const& scope_id)
     throw NotFoundException("RegistryObject::is_scope_process_running(): no such scope: ",  scope_id);
 }
 
-bool RegistryObject::add_local_scope(std::string const& scope_id, ScopeMetadata const& metadata,
+bool RegistryObject::add_local_scope(std::string const& scope_id,
+                                     ScopeMetadata const& metadata,
                                      ScopeExecData const& exec_data)
 {
     if (scope_id.empty())
@@ -264,7 +265,10 @@ bool RegistryObject::add_local_scope(std::string const& scope_id, ScopeMetadata 
         return_value = false;
     }
     scopes_.insert(make_pair(scope_id, metadata));
-    scope_processes_.insert(make_pair(scope_id, make_shared<ScopeProcess>(exec_data, publisher_, logger_)));
+    scope_processes_.insert(make_pair(scope_id, make_shared<ScopeProcess>(exec_data,
+                                                                          publisher_,
+                                                                          lxc_exec_command_,
+                                                                          logger_)));
 
     if (publisher_)
     {
@@ -302,7 +306,7 @@ bool RegistryObject::remove_local_scope(std::string const& scope_id)
     {
         try
         {
-            proc->kill(); // TODO: Wrong process if in container
+            proc->kill();
         }
         catch (...)
         {
@@ -355,7 +359,6 @@ void RegistryObject::on_process_death(core::posix::ChildProcess const& process)
     // Broadcast this message to each scope process until we have found the process in question.
     // (This is slightly more efficient than just connecting the signal to every scope process.)
 
-    // TODO: wrong pid if in container
     pid_t pid = process.pid();
     for (auto& scope_process : scope_processes_)
     {
@@ -376,7 +379,7 @@ void RegistryObject::on_state_received(std::string const& scope_id, int pid, Sta
         switch (state)
         {
             case StateReceiverObject::ScopeReady:
-                it->second->update_state(ScopeProcess::ProcessState::Running);
+                it->second->update_state(ScopeProcess::ProcessState::Running, pid);
                 break;
             case StateReceiverObject::ScopeStopping:
                 it->second->update_state(ScopeProcess::ProcessState::Stopping);
@@ -385,7 +388,6 @@ void RegistryObject::on_state_received(std::string const& scope_id, int pid, Sta
                 BOOST_LOG(logger_)
                     << "RegistryObject::on_state_received(): unknown state received from scope: " << scope_id;
         }
-        // TODO: store pid
     }
     // simply ignore states from scopes the registry does not know about
 }
@@ -469,19 +471,26 @@ void RegistryObject::ss_list_update()
 
 RegistryObject::ScopeProcess::ScopeProcess(ScopeExecData exec_data,
                                            std::weak_ptr<MWPublisher> const& publisher,
+                                           std::string const& lxc_exec_command,
                                            boost::log::sources::severity_channel_logger_mt<>& logger)
     : exec_data_(exec_data)
     , reg_publisher_(publisher)
     , manually_started_(false)
+    , lxc_exec_command_(lxc_exec_command)
+    , lxc_pid_(0)
     , logger_(logger)
 {
+#if !defined(_GLIBCXX_USE_CXX11_ABI) || _GLIBCXX_USE_CXX11_ABI == 0
+    new_abi_ = false;
+#else
+    new_abi_ = true;
+#endif
 }
 
 RegistryObject::ScopeProcess::~ScopeProcess()
 {
     try
     {
-        // TODO: make sure that's the right process
         kill();
     }
     catch(std::exception const& e)
@@ -496,10 +505,10 @@ RegistryObject::ScopeProcess::ProcessState RegistryObject::ScopeProcess::state()
     return state_;
 }
 
-void RegistryObject::ScopeProcess::update_state(ProcessState state)
+void RegistryObject::ScopeProcess::update_state(ProcessState state, int pid)
 {
     std::lock_guard<std::mutex> lock(process_mutex_);
-    update_state_unlocked(state);
+    update_state_unlocked(state, pid);
 }
 
 bool RegistryObject::ScopeProcess::wait_for_state(ProcessState state) const
@@ -560,6 +569,30 @@ void RegistryObject::ScopeProcess::exec(
         // No custom_exec was provided, use the default scoperunner
         program = exec_data_.scoperunner_path;
         argv.insert(argv.end(), {exec_data_.runtime_config, exec_data_.scope_config});
+    }
+
+    // If the scope is a legacy scope and this registry uses the gcc 5 ABI,
+    // mangle the command line to prepend lxc_exec_command_.
+    if (new_abi_ && exec_data_.framework_major == 14)
+    {
+        wordexp_t exp;
+        std::string cmd;
+        std::vector<std::string> args;
+
+        if (wordexp(lxc_exec_command_.c_str(), &exp, WRDE_NOCMD) != 0 || exp.we_wordc < 1)
+        {
+            throw unity::ResourceException("RegistryObject::ScopeProcess::exec(): Invalid LXC.ExecCommand: \""
+                                           + lxc_exec_command_ + "\"");
+        }
+        util::ResourcePtr<wordexp_t*, decltype(&wordfree)> free_guard(&exp, wordfree);
+        for (unsigned i = 1; i < exp.we_wordc; ++i)
+        {
+            args.push_back(exp.we_wordv[i]);
+        }
+        args.push_back(program);
+        args.insert(args.end(), argv.begin(), argv.end());
+        argv = args;
+        program = exp.we_wordv[0];
     }
 
     {
@@ -649,8 +682,13 @@ void RegistryObject::ScopeProcess::clear_handle_unlocked()
     update_state_unlocked(Stopped);
 }
 
-void RegistryObject::ScopeProcess::update_state_unlocked(ProcessState new_state)
+void RegistryObject::ScopeProcess::update_state_unlocked(ProcessState new_state, int pid)
 {
+    if (new_state == ProcessState::Running && pid != 0)
+    {
+        lxc_pid_ = pid;
+    }
+
     auto reg_publisher = reg_publisher_.lock();
     if (new_state == state_)
     {
@@ -722,6 +760,21 @@ bool RegistryObject::ScopeProcess::wait_for_state(std::unique_lock<std::mutex>& 
     }
 }
 
+void RegistryObject::ScopeProcess::kill_in_container(int sig)
+{
+    if (lxc_pid_ == 0)
+    {
+        return;
+    }
+    ostringstream s;
+    s << lxc_exec_command_ << " -" << sig << " " << lxc_pid_;
+    int rc = system(s.str().c_str());
+    if (rc != 0)
+    {
+        throw runtime_error(string("\")" + s.str() + "\" returned exit status " + std::to_string(rc)));
+    }
+}
+
 void RegistryObject::ScopeProcess::kill(std::unique_lock<std::mutex>& lock)
 {
     if (state_ == Stopped)
@@ -732,7 +785,14 @@ void RegistryObject::ScopeProcess::kill(std::unique_lock<std::mutex>& lock)
     try
     {
         // first try to close the scope process gracefully
-        process_.send_signal_or_throw(core::posix::Signal::sig_term);
+        if (new_abi_ && exec_data_.framework_major == 14)
+        {
+            kill_in_container(SIGTERM);
+        }
+        else
+        {
+            process_.send_signal_or_throw(core::posix::Signal::sig_term);
+        }
 
         if (!wait_for_state(lock, ScopeProcess::Stopped))
         {
@@ -744,16 +804,24 @@ void RegistryObject::ScopeProcess::kill(std::unique_lock<std::mutex>& lock)
                 << "Killing the process instead.";
 
             // scope is taking too long to close, send kill signal
-            process_.send_signal(core::posix::Signal::sig_kill, ec);
+            if (new_abi_ && exec_data_.framework_major == 14)
+            {
+                kill_in_container(SIGKILL);
+            }
+            else
+            {
+                process_.send_signal(core::posix::Signal::sig_kill, ec);
+            }
         }
 
         // clear the process handle
         clear_handle_unlocked();
     }
-    catch (std::exception const&)
+    catch (std::exception const& e)
     {
         BOOST_LOG(logger_)
-            << "RegistryObject::ScopeProcess::kill(): Failed to kill scope: \"" << exec_data_.scope_id << "\"";
+            << "RegistryObject::ScopeProcess::kill(): Failed to kill scope: \"" << exec_data_.scope_id
+            << "\": " << e.what();
 
         // clear the process handle
         // even on error, the previous handle will be unrecoverable at this point

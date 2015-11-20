@@ -337,6 +337,7 @@ TEST(Registry, no_idle_timeout_in_debug_mode)
 
     // check that the scope is still running after 4s
     // (due to "DebugMode = true" and despite "IdleTimeout = 2")
+    start_time = std::chrono::system_clock::now();
     std::this_thread::sleep_for(std::chrono::seconds{4});
     EXPECT_TRUE(r->is_scope_running("testscopeC"));
 

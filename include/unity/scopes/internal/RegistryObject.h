@@ -48,6 +48,7 @@ public:
         ScopeExecData(std::initializer_list<std::string>) = delete;
         std::string scope_id;
         std::string custom_exec;
+        int framework_major;
         std::string scoperunner_path;
         std::string runtime_config;
         std::string scope_config;
@@ -103,11 +104,12 @@ private:
 
         ScopeProcess(ScopeExecData exec_data,
                      std::weak_ptr<MWPublisher> const& publisher,
+                     std::string const& lxc_exec_command,
                      boost::log::sources::severity_channel_logger_mt<>& logger);
         ~ScopeProcess();
 
         ProcessState state() const;
-        void update_state(ProcessState state);
+        void update_state(ProcessState state, int pid = 0);
         bool wait_for_state(ProcessState state) const;
 
         void exec(core::posix::ChildProcess::DeathObserver& death_observer,
@@ -119,9 +121,10 @@ private:
     private:
         // the following methods must be called with process_mutex_ locked
         void clear_handle_unlocked();
-        void update_state_unlocked(ProcessState state);
+        void update_state_unlocked(ProcessState state, int pid = 0);
 
         bool wait_for_state(std::unique_lock<std::mutex>& lock, ProcessState state) const;
+        void kill_in_container(int sig);
         void kill(std::unique_lock<std::mutex>& lock);
 
         std::vector<std::string> expand_custom_exec();
@@ -134,6 +137,9 @@ private:
         core::posix::ChildProcess process_ = core::posix::ChildProcess::invalid();
         std::weak_ptr<MWPublisher> reg_publisher_; // weak_ptr, so processes don't hold publisher alive
         bool manually_started_;
+        bool new_abi_;
+        std::string const& lxc_exec_command_;
+        std::atomic_int lxc_pid_;
         boost::log::sources::severity_channel_logger_mt<>& logger_;
     };
 

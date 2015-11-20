@@ -2,3 +2,4 @@
 DisplayName = ThrowingScope
 Description = Test scope that throws from various methods.
 Author = Michi
+Framework = 15.04

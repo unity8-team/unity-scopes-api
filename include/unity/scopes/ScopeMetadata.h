@@ -221,6 +221,12 @@ public:
     */
     bool is_aggregator() const;  // optional (default = false)
 
+    /**
+    \brief Return the major version of the framework for this scope.
+    \return The major version, such as `15` for framework `15.04`.
+    */
+    int framework_major() const;
+
 private:
     ScopeMetadata(std::unique_ptr<internal::ScopeMetadataImpl>);           // Instantiable only by ScopeMetadataImpl
     std::unique_ptr<internal::ScopeMetadataImpl> p;

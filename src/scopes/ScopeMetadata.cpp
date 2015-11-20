@@ -167,6 +167,11 @@ bool ScopeMetadata::is_aggregator() const
     return p->is_aggregator();
 }
 
+int ScopeMetadata::framework_major() const
+{
+    return p->framework_major();
+}
+
 //! @endcond
 
 } // namespace scopes

@@ -38,7 +38,7 @@ TEST(RegistryConfig, basic)
     EXPECT_EQ("/InstallDir", c.scope_installdir());
     EXPECT_EQ("/OEMDir", c.oem_installdir());
     EXPECT_TRUE(boost::ends_with(c.click_installdir(), "/unity-scopes/"));
-    EXPECT_EQ("lxc-attach -n vivid --", c.lxc_exec_command());
+    EXPECT_EQ("lxc-attach -n vivid --keep-env --", c.lxc_exec_command());
     EXPECT_EQ("/SomeAbsolutePath", c.scoperunner_path());
     EXPECT_EQ(3000, c.process_timeout());
 }

@@ -410,6 +410,7 @@ void add_local_scope(RegistryObject::SPtr const& registry,
     exec_data.runtime_config = config_file;
     exec_data.scope_config = scope.second;
     exec_data.debug_mode = sc.debug_mode();
+    exec_data.framework_major = meta.framework_major();
 
     registry->add_local_scope(scope.first, std::move(meta), exec_data);
 }
