@@ -167,12 +167,13 @@ TEST(Registry, metadata)
     EXPECT_EQ("returnConfigScope", meta.scope_id());
     EXPECT_EQ("Canonical Ltd.", meta.author());
     EXPECT_EQ("returnConfigScope.DisplayName", meta.display_name());
-    EXPECT_EQ("returnConfigScope.Description", meta.description());
+    EXPECT_EQ("Scope to simulate running in an lxc container, exec'd via the fake lxc-attach script if on Vivid.",
+              meta.description());
     EXPECT_EQ(rcart, meta.art());
     EXPECT_EQ(rcicon, meta.icon());
     EXPECT_EQ("returnConfigScope.HotKey", meta.hot_key());
     EXPECT_EQ("returnConfigScope.SearchHint", meta.search_hint());
-    EXPECT_EQ(TEST_RUNTIME_PATH "/scopes/return_config", meta.scope_directory());
+    EXPECT_EQ(TEST_RUNTIME_PATH "/scopes/lxc_return_config", meta.scope_directory());
     defs = meta.settings_definitions();
     EXPECT_EQ(1, defs.size());
     EXPECT_TRUE(meta.location_data_needed());
@@ -736,7 +737,7 @@ TEST(Registry, lxc_scope_config)
     EXPECT_TRUE(receiver->wait_until_finished());
 
     auto results = receiver->results();
-    EXPECT_EQ(TEST_RUNTIME_PATH "/scopes/return_config", results[0].title());
+    EXPECT_EQ(TEST_RUNTIME_PATH "/scopes/lxc_return_config", results[0].title());
     EXPECT_EQ("/tmp/unconfined/returnConfigScope", results[1].title());
     EXPECT_EQ("/tmp/returnConfigScope", results[2].title());
     std::string uid = std::to_string(geteuid());

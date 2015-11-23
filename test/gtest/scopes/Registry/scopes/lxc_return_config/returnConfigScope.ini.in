@@ -1,6 +1,6 @@
 [ScopeConfig]
 DisplayName = returnConfigScope.DisplayName
-Description = Scope to simulate running in an lxc container, exec'd via the fake lxc-attach script.
+Description = Scope to simulate running in an lxc container, exec'd via the fake lxc-attach script if on Vivid.
 Art = /foo/returnConfigScope.Art
 Author = Canonical Ltd.
 Icon = file://data/returnConfigScope.Icon
