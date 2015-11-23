@@ -753,7 +753,7 @@ int main(int argc, char **argv)
     // Unlink in case we left the link behind from an earlier interrupted run.
     system::error_code ec;
     filesystem::remove_all(TEST_RUNTIME_PATH "/scopes/testscopeC", ec);
-    filesystem::remove_all(TEST_RUNTIME_PATH "/click",ec);
+    filesystem::remove_all(TEST_RUNTIME_PATH "/click", ec);
     filesystem::remove(TEST_RUNTIME_PATH "/scopes/testscopeD", ec);
     filesystem::remove_all(TEST_RUNTIME_PATH "/scopes/testfolder", ec);
     filesystem::remove(TEST_RUNTIME_PATH "/scopes/testscopeB/testscopeB-settings.ini", ec);

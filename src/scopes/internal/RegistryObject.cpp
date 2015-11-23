@@ -685,6 +685,7 @@ void RegistryObject::ScopeProcess::clear_handle_unlocked()
 {
     process_ = core::posix::ChildProcess::invalid();
     update_state_unlocked(Stopped);
+    lxc_pid_ = 0;
 }
 
 void RegistryObject::ScopeProcess::update_state_unlocked(ProcessState new_state, int pid)
@@ -779,12 +780,17 @@ void RegistryObject::ScopeProcess::kill_process(core::posix::Signal sig)
         return;
     }
 
+    if (lxc_pid_ == 0)
+    {
+        return;
+    }
+
     ostringstream s;
     for (auto const& arg : lxc_exec_args_)
     {
         s << arg << " ";
     }
-    s << " kill" << " -" << int(sig) << " " << lxc_pid_;
+    s << "kill" << " -" << int(sig) << " " << lxc_pid_;
     int rc = system(s.str().c_str());
     if (rc != 0)
     {
