@@ -47,8 +47,10 @@ public:
     {
     }
 
-    virtual void push(CategorisedResult /* result */) override
+    virtual void push(CategorisedResult result) override
     {
+        std::lock_guard<std::mutex> lock(mutex_);
+        results_.push_back(result);
     }
 
     virtual void finished(CompletionDetails const& details) override
@@ -72,11 +74,17 @@ public:
         return finished_ok_;
     }
 
+    std::vector<CategorisedResult> results() const
+    {
+        return results_;
+    }
+
 private:
     bool done_;
     bool finished_ok_;
     std::mutex mutex_;
     std::condition_variable cond_;
+    std::vector<CategorisedResult> results_;
 };
 
 TEST(Registry, metadata)
@@ -150,6 +158,27 @@ TEST(Registry, metadata)
     EXPECT_EQ(0, meta.child_scope_ids().size());
     EXPECT_EQ(0, meta.keywords().size());
     EXPECT_EQ(0, meta.version());
+    EXPECT_FALSE(meta.is_aggregator());
+
+    const char *rcart = "/foo/returnConfigScope.Art";
+    const char *rcicon = "file://data/returnConfigScope.Icon";
+
+    meta = r->get_metadata("returnConfigScope");
+    EXPECT_EQ("returnConfigScope", meta.scope_id());
+    EXPECT_EQ("Canonical Ltd.", meta.author());
+    EXPECT_EQ("returnConfigScope.DisplayName", meta.display_name());
+    EXPECT_EQ("returnConfigScope.Description", meta.description());
+    EXPECT_EQ(rcart, meta.art());
+    EXPECT_EQ(rcicon, meta.icon());
+    EXPECT_EQ("returnConfigScope.HotKey", meta.hot_key());
+    EXPECT_EQ("returnConfigScope.SearchHint", meta.search_hint());
+    EXPECT_EQ(TEST_RUNTIME_PATH "/scopes/return_config", meta.scope_directory());
+    defs = meta.settings_definitions();
+    EXPECT_EQ(1, defs.size());
+    EXPECT_TRUE(meta.location_data_needed());
+    EXPECT_EQ(0, meta.child_scope_ids().size());
+    EXPECT_EQ(3, meta.keywords().size());
+    EXPECT_EQ(1, meta.version());
     EXPECT_FALSE(meta.is_aggregator());
 }
 
@@ -337,7 +366,6 @@ TEST(Registry, no_idle_timeout_in_debug_mode)
 
     // check that the scope is still running after 4s
     // (due to "DebugMode = true" and despite "IdleTimeout = 2")
-    start_time = std::chrono::system_clock::now();
     std::this_thread::sleep_for(std::chrono::seconds{4});
     EXPECT_TRUE(r->is_scope_running("testscopeC"));
 
@@ -478,13 +506,14 @@ TEST(Registry, list_update_notify_before_click_folder_exists)
 
     system::error_code ec;
 
-    // First check that we have 2 scopes registered
+    // First check that we have 3 scopes registered
     MetadataMap list = r->list();
-    EXPECT_EQ(2, list.size());
+    EXPECT_EQ(3, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_EQ(list.end(), list.find("testscopeC"));
     EXPECT_EQ(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     std::cout << "Create click folder: " TEST_RUNTIME_PATH "/click" << std::endl;
     filesystem::create_directory(TEST_RUNTIME_PATH "/click", ec);
@@ -496,13 +525,14 @@ TEST(Registry, list_update_notify_before_click_folder_exists)
     ASSERT_EQ("Success", ec.message());
     EXPECT_TRUE(wait_for_update());
 
-    // Now check that we have 3 scopes registered
+    // Now check that we have 4 scopes registered
     list = r->list();
-    EXPECT_EQ(3, list.size());
+    EXPECT_EQ(4, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_NE(list.end(), list.find("testscopeC"));
     EXPECT_EQ(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     std::cout << "Remove click folder" << std::endl;
     filesystem::remove_all(TEST_RUNTIME_PATH "/click",ec);
@@ -540,13 +570,14 @@ TEST(Registry, list_update_notify)
 
     system::error_code ec;
 
-    // First check that we have 2 scopes registered
+    // First check that we have 3 scopes registered
     MetadataMap list = r->list();
-    EXPECT_EQ(2, list.size());
+    EXPECT_EQ(3, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_EQ(list.end(), list.find("testscopeC"));
     EXPECT_EQ(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     // Copy testscopeC into the scopes folder
     std::cout << "Create testscopeC dir in the scopes folder" << std::endl;
@@ -559,13 +590,14 @@ TEST(Registry, list_update_notify)
     ASSERT_EQ("Success", ec.message());
     EXPECT_TRUE(wait_for_update());
 
-    // Now check that we have 3 scopes registered
+    // Now check that we have 4 scopes registered
     list = r->list();
-    EXPECT_EQ(3, list.size());
+    EXPECT_EQ(4, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_NE(list.end(), list.find("testscopeC"));
     EXPECT_EQ(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     reset();
     // Make a symlink to testscopeD in the scopes folder
@@ -595,7 +627,7 @@ TEST(Registry, list_update_notify)
         try
         {
             list = r->list();
-            ok = list.size() == 4;
+            ok = list.size() == 5;
         }
         catch (std::exception const& e)
         {
@@ -609,6 +641,7 @@ TEST(Registry, list_update_notify)
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_NE(list.end(), list.find("testscopeC"));
     EXPECT_NE(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     reset();
     // Remove testscopeC from the scopes folder
@@ -617,13 +650,14 @@ TEST(Registry, list_update_notify)
     ASSERT_EQ("Success", ec.message());
     EXPECT_TRUE(wait_for_update());
 
-    // Now check that we have 3 scopes registered again
+    // Now check that we have 4 scopes registered again
     list = r->list();
-    EXPECT_EQ(3, list.size());
+    EXPECT_EQ(4, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_EQ(list.end(), list.find("testscopeC"));
     EXPECT_NE(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     reset();
     // Remove symlink to testscopeD from the scopes folder
@@ -632,13 +666,14 @@ TEST(Registry, list_update_notify)
     ASSERT_EQ("Success", ec.message());
     EXPECT_TRUE(wait_for_update());
 
-    // Now check that we are back to having 2 scopes registered
+    // Now check that we are back to having 3 scopes registered
     list = r->list();
-    EXPECT_EQ(2, list.size());
+    EXPECT_EQ(3, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_EQ(list.end(), list.find("testscopeC"));
     EXPECT_EQ(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     // Make a folder in scopes named "testfolder"
     std::cout << "Make a folder in scopes named \"testfolder\"" << std::endl;
@@ -647,11 +682,12 @@ TEST(Registry, list_update_notify)
 
     // Check that no scopes were registered
     list = r->list();
-    EXPECT_EQ(2, list.size());
+    EXPECT_EQ(3, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_EQ(list.end(), list.find("testscopeC"));
     EXPECT_EQ(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     reset();
     // Make a symlink to testscopeC.ini in testfolder
@@ -660,13 +696,14 @@ TEST(Registry, list_update_notify)
     ASSERT_EQ("Success", ec.message());
     EXPECT_TRUE(wait_for_update());
 
-    // Now check that we have 3 scopes registered
+    // Now check that we have 4 scopes registered
     list = r->list();
-    EXPECT_EQ(3, list.size());
+    EXPECT_EQ(4, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_NE(list.end(), list.find("testscopeC"));
     EXPECT_EQ(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
 
     reset();
     // Remove testfolder
@@ -675,13 +712,35 @@ TEST(Registry, list_update_notify)
     ASSERT_EQ("Success", ec.message());
     EXPECT_TRUE(wait_for_update());
 
-    // Now check that we are back to having 2 scopes registered
+    // Now check that we are back to having 3 scopes registered
     list = r->list();
-    EXPECT_EQ(2, list.size());
+    EXPECT_EQ(3, list.size());
     EXPECT_NE(list.end(), list.find("testscopeA"));
     EXPECT_NE(list.end(), list.find("testscopeB"));
     EXPECT_EQ(list.end(), list.find("testscopeC"));
     EXPECT_EQ(list.end(), list.find("testscopeD"));
+    EXPECT_NE(list.end(), list.find("returnConfigScope"));
+}
+
+TEST(Registry, lxc_scope_config)
+{
+    Runtime::UPtr rt = Runtime::create(TEST_RUNTIME_FILE);
+    RegistryProxy r = rt->registry();
+
+    auto meta = r->get_metadata("returnConfigScope");
+    auto sp = meta.proxy();
+
+    auto receiver = std::make_shared<Receiver>();
+    SearchListenerBase::SPtr reply(receiver);
+    auto ctrl = sp->search("foo", SearchMetadata("unused", "unused"), reply);
+    EXPECT_TRUE(receiver->wait_until_finished());
+
+    auto results = receiver->results();
+    EXPECT_EQ(TEST_RUNTIME_PATH "/scopes/return_config", results[0].title());
+    EXPECT_EQ("/tmp/unconfined/returnConfigScope", results[1].title());
+    EXPECT_EQ("/tmp/returnConfigScope", results[2].title());
+    std::string uid = std::to_string(geteuid());
+    EXPECT_EQ("/run/user/" + uid + "/scopes/unconfined/returnConfigScope", results[3].title());
 }
 
 int main(int argc, char **argv)

@@ -5,3 +5,4 @@ Scope.InstallDir = @CMAKE_CURRENT_BINARY_DIR@/scopes
 OEM.InstallDir = /unused
 Click.InstallDir = @CMAKE_CURRENT_BINARY_DIR@/click
 Scoperunner.Path = @PROJECT_BINARY_DIR@/scoperunner/scoperunner
+LXC.ExecCommand = @CMAKE_CURRENT_SOURCE_DIR@/lxc-attach

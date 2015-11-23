@@ -1,2 +1,3 @@
 add_subdirectory(testscopeA)
 add_subdirectory(testscopeB)
+add_subdirectory(lxc_return_config)

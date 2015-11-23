@@ -1,0 +1,4 @@
+[locationSetting]
+displayName = LXCLocation
+type = string
+defaultValue = LXCCity
