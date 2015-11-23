@@ -74,7 +74,6 @@ RegistryObject::RegistryObject(core::posix::ChildProcess::DeathObserver& death_o
           })
       },
       executor_(executor),
-      lxc_exec_command_(lxc_exec_command),
       generate_desktop_files_(generate_desktop_files)
 {
     if (middleware)
@@ -96,6 +95,19 @@ RegistryObject::RegistryObject(core::posix::ChildProcess::DeathObserver& death_o
         {
             BOOST_LOG(logger_) << "RegistryObject(): failed to create registry publisher: " << e.what();
         }
+    }
+
+    // Construct args for exec in lxc container.
+    wordexp_t exp;
+    if (wordexp(lxc_exec_command.c_str(), &exp, WRDE_NOCMD) != 0 || exp.we_wordc < 1)
+    {
+        throw unity::ResourceException("RegistryObject::ScopeProcess::exec(): Invalid LXC.ExecCommand: \""
+                                       + lxc_exec_command + "\"");
+    }
+    util::ResourcePtr<wordexp_t*, decltype(&wordfree)> free_guard(&exp, wordfree);
+    for (unsigned i = 0; i < exp.we_wordc; ++i)
+    {
+        lxc_exec_args_.push_back(exp.we_wordv[i]);
     }
 }
 
@@ -267,7 +279,7 @@ bool RegistryObject::add_local_scope(std::string const& scope_id,
     scopes_.insert(make_pair(scope_id, metadata));
     scope_processes_.insert(make_pair(scope_id, make_shared<ScopeProcess>(exec_data,
                                                                           publisher_,
-                                                                          lxc_exec_command_,
+                                                                          lxc_exec_args_,
                                                                           logger_)));
 
     if (publisher_)
@@ -471,12 +483,12 @@ void RegistryObject::ss_list_update()
 
 RegistryObject::ScopeProcess::ScopeProcess(ScopeExecData exec_data,
                                            std::weak_ptr<MWPublisher> const& publisher,
-                                           std::string const& lxc_exec_command,
+                                           vector<std::string> const& lxc_exec_args,
                                            boost::log::sources::severity_channel_logger_mt<>& logger)
     : exec_data_(exec_data)
     , reg_publisher_(publisher)
     , manually_started_(false)
-    , lxc_exec_command_(lxc_exec_command)
+    , lxc_exec_args_(lxc_exec_args)
     , lxc_pid_(0)
     , logger_(logger)
 {
@@ -485,6 +497,7 @@ RegistryObject::ScopeProcess::ScopeProcess(ScopeExecData exec_data,
 #else
     new_abi_ = true;
 #endif
+    exec_in_container_ = new_abi_ && exec_data_.framework_major == 14;
 }
 
 RegistryObject::ScopeProcess::~ScopeProcess()
@@ -572,27 +585,14 @@ void RegistryObject::ScopeProcess::exec(
     }
 
     // If the scope is a legacy scope and this registry uses the gcc 5 ABI,
-    // mangle the command line to prepend lxc_exec_command_.
-    if (new_abi_ && exec_data_.framework_major == 14)
+    // mangle the command line to prepend lxc_exec_args_.
+    if (exec_in_container_)
     {
-        wordexp_t exp;
-        std::string cmd;
-        std::vector<std::string> args;
-
-        if (wordexp(lxc_exec_command_.c_str(), &exp, WRDE_NOCMD) != 0 || exp.we_wordc < 1)
-        {
-            throw unity::ResourceException("RegistryObject::ScopeProcess::exec(): Invalid LXC.ExecCommand: \""
-                                           + lxc_exec_command_ + "\"");
-        }
-        util::ResourcePtr<wordexp_t*, decltype(&wordfree)> free_guard(&exp, wordfree);
-        for (unsigned i = 1; i < exp.we_wordc; ++i)
-        {
-            args.push_back(exp.we_wordv[i]);
-        }
+        vector<string> args(++lxc_exec_args_.begin(), lxc_exec_args_.end());
         args.push_back(program);
         args.insert(args.end(), argv.begin(), argv.end());
         argv = args;
-        program = exp.we_wordv[0];
+        program = lxc_exec_args_[0];
     }
 
     {
@@ -619,12 +619,17 @@ void RegistryObject::ScopeProcess::exec(
         process_ = executor->exec(program, argv, env,
                                   core::posix::StandardStream::stdin,
                                   exec_data_.confinement_profile);
+
+        argv_string_ = program;
+        for (auto const& arg : argv)
+        {
+            argv_string_ += " " + arg;
+        }
         if (process_.pid() <= 0)
         {
             clear_handle_unlocked();
             throw unity::ResourceException("RegistryObject::ScopeProcess::exec(): Failed to exec scope via command: \""
-                                           + exec_data_.scoperunner_path + " " + exec_data_.runtime_config + " "
-                                           + exec_data_.scope_config + "\"");
+                                           + argv_string_ + "\"");
         }
     }
 
@@ -643,14 +648,14 @@ void RegistryObject::ScopeProcess::exec(
         }
         throw unity::ResourceException("RegistryObject::ScopeProcess::exec(): exec aborted. Scope: \""
                                        + exec_data_.scope_id + "\" took longer than "
-                                       + std::to_string(exec_data_.timeout_ms) + " ms to start.");
+                                       + std::to_string(exec_data_.timeout_ms) + " ms to start, cmd: " + argv_string_);
     }
-
-    BOOST_LOG_SEV(logger_, Logger::Info)
-        << "RegistryObject::ScopeProcess::exec(): Process for scope: \"" << exec_data_.scope_id << "\" started";
 
     // 4. add the scope process to the death observer
     death_observer.add(process_);
+
+    BOOST_LOG_SEV(logger_, Logger::Info)
+        << "RegistryObject::ScopeProcess::exec(): Process for scope: \"" << exec_data_.scope_id << "\" started";
 }
 
 void RegistryObject::ScopeProcess::kill()
@@ -721,9 +726,15 @@ void RegistryObject::ScopeProcess::update_state_unlocked(ProcessState new_state,
 
         if (state_ != Stopping)
         {
-            BOOST_LOG(logger_)
-                << "RegistryObject::ScopeProcess: Scope: \"" << exec_data_.scope_id
-                << "\" closed unexpectedly. Either the process crashed or was killed forcefully.";
+            ostringstream s;
+            s << "RegistryObject::ScopeProcess: Scope: \"" << exec_data_.scope_id
+              << "\" closed unexpectedly";
+            if (exec_in_container_)
+            {
+                s << ", check that Framework is set correctly in " << exec_data_.scope_id << ".ini,";
+            }
+            s << " cmd: " << argv_string_;
+            BOOST_LOG(logger_) << s.str();
         }
     }
     else if (new_state == Stopping && manually_started_)
@@ -760,18 +771,24 @@ bool RegistryObject::ScopeProcess::wait_for_state(std::unique_lock<std::mutex>& 
     }
 }
 
-void RegistryObject::ScopeProcess::kill_in_container(int sig)
+void RegistryObject::ScopeProcess::kill_process(core::posix::Signal sig)
 {
-    if (lxc_pid_ == 0)
+    if (!exec_in_container_)
     {
+        process_.send_signal_or_throw(sig);
         return;
     }
+
     ostringstream s;
-    s << lxc_exec_command_ << " -" << sig << " " << lxc_pid_;
+    for (auto const& arg : lxc_exec_args_)
+    {
+        s << arg << " ";
+    }
+    s << " kill" << " -" << int(sig) << " " << lxc_pid_;
     int rc = system(s.str().c_str());
     if (rc != 0)
     {
-        throw runtime_error(string("\")" + s.str() + "\" returned exit status " + std::to_string(rc)));
+        throw runtime_error(string("\"" + s.str() + "\" returned exit status " + std::to_string(rc)));
     }
 }
 
@@ -785,14 +802,7 @@ void RegistryObject::ScopeProcess::kill(std::unique_lock<std::mutex>& lock)
     try
     {
         // first try to close the scope process gracefully
-        if (new_abi_ && exec_data_.framework_major == 14)
-        {
-            kill_in_container(SIGTERM);
-        }
-        else
-        {
-            process_.send_signal_or_throw(core::posix::Signal::sig_term);
-        }
+        kill_process(core::posix::Signal::sig_term);
 
         if (!wait_for_state(lock, ScopeProcess::Stopped))
         {
@@ -801,17 +811,10 @@ void RegistryObject::ScopeProcess::kill(std::unique_lock<std::mutex>& lock)
             BOOST_LOG(logger_)
                 << "RegistryObject::ScopeProcess::kill(): Scope: \"" << exec_data_.scope_id
                 << "\" took longer than " << exec_data_.timeout_ms << " ms to exit gracefully. "
-                << "Killing the process instead.";
+                << "Killing the process instead, cmd: " << argv_string_;
 
             // scope is taking too long to close, send kill signal
-            if (new_abi_ && exec_data_.framework_major == 14)
-            {
-                kill_in_container(SIGKILL);
-            }
-            else
-            {
-                process_.send_signal(core::posix::Signal::sig_kill, ec);
-            }
+            kill_process(core::posix::Signal::sig_int);
         }
 
         // clear the process handle
