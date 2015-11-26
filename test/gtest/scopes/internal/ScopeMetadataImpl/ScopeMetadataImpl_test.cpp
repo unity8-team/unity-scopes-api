@@ -169,11 +169,13 @@ TEST(ScopeMetadataImpl, basic)
     mi2->set_is_aggregator(true);
     mi2->set_version(11);
     mi2->set_framework_major(33);
+    mi2->set_framework_minor(22);
 
     // Make another copy, so we get coverage on the entire copy constructor
     unique_ptr<ScopeMetadataImpl> mi3(new ScopeMetadataImpl(*mi2));
     EXPECT_EQ(11, mi3->version());
     EXPECT_EQ(33, mi3->framework_major());
+    EXPECT_EQ(22, mi3->framework_minor());
 
     // Check that optional fields are set correctly
     m = ScopeMetadataImpl::create(move(mi2));
@@ -212,6 +214,7 @@ TEST(ScopeMetadataImpl, basic)
     ti->set_keywords(set<string>{"music", "video"});
     ti->set_is_aggregator(true);
     ti->set_framework_major(72);
+    ti->set_framework_minor(62);
 
     // Check impl assignment operator
     ScopeMetadataImpl ci(&mw);
@@ -237,6 +240,7 @@ TEST(ScopeMetadataImpl, basic)
     EXPECT_EQ((set<string>{"music", "video"}), ci.keywords());
     EXPECT_TRUE(ci.is_aggregator());
     EXPECT_EQ(72, ci.framework_major());
+    EXPECT_EQ(62, ci.framework_minor());
 
     // Check public assignment operator
     auto tmp = ScopeMetadataImpl::create(move(ti));
@@ -341,11 +345,12 @@ TEST(ScopeMetadataImpl, serialize)
     mi->set_keywords({"news", "games"});
     mi->set_is_aggregator(false);
     mi->set_framework_major(42);
+    mi->set_framework_minor(32);
 
     // Check that serialize() sets the map values correctly
     auto m = ScopeMetadataImpl::create(move(mi));
     auto var = m.serialize();
-    EXPECT_EQ(20u, var.size());
+    EXPECT_EQ(21u, var.size());
     EXPECT_EQ("scope_id", var["scope_id"].get_string());
     EXPECT_EQ("display_name", var["display_name"].get_string());
     EXPECT_EQ("description", var["description"].get_string());
@@ -371,6 +376,7 @@ TEST(ScopeMetadataImpl, serialize)
     EXPECT_EQ("news", var["keywords"].get_array()[1].get_string());
     EXPECT_FALSE(var["is_aggregator"].get_bool());
     EXPECT_EQ(42, var["framework_major"].get_int());
+    EXPECT_EQ(32, var["framework_minor"].get_int());
 
     // Make another instance from the VariantMap and check its fields
     ScopeMetadataImpl c(var, &mw);
@@ -400,6 +406,7 @@ TEST(ScopeMetadataImpl, serialize)
     EXPECT_NE(c.keywords().end(), c.keywords().find("games"));
     EXPECT_FALSE(c.is_aggregator());
     EXPECT_EQ(42, c.framework_major());
+    EXPECT_EQ(32, c.framework_minor());
 }
 
 TEST(ScopeMetadataImpl, setter_exceptions)
@@ -427,6 +434,17 @@ TEST(ScopeMetadataImpl, setter_exceptions)
     catch (InvalidArgumentException const&e)
     {
         EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadata::set_framework_major(): invalid version: 13",
+                     e.what());
+    }
+
+    try
+    {
+        mi.set_framework_minor(-1);
+        FAIL();
+    }
+    catch (InvalidArgumentException const&e)
+    {
+        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadata::set_framework_minor(): invalid version: -1",
                      e.what());
     }
 }
@@ -632,6 +650,21 @@ TEST(ScopeMetadataImpl, deserialize_exceptions)
                      e.what());
     }
     m["framework_major"] = 14;
+
+    m["framework_minor"] = -1;
+    try
+    {
+        ScopeMetadataImpl mi(m, &mw);
+        mi.deserialize(m);
+        FAIL();
+    }
+    catch (InvalidArgumentException const&e)
+    {
+        EXPECT_STREQ("unity::InvalidArgumentException: ScopeMetadataImpl::deserialize(): "
+                     "invalid attribute 'framework_minor' with value -1",
+                     e.what());
+    }
+    m["framework_minor"] = 0;
 
     m["results_ttl_type"] = -1;
     try

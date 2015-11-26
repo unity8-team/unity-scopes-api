@@ -497,7 +497,13 @@ RegistryObject::ScopeProcess::ScopeProcess(ScopeExecData exec_data,
 #else
     new_abi_ = true;
 #endif
-    exec_in_container_ = new_abi_ && exec_data_.framework_major == 14;
+    // If this registry uses the new ABI, and the scope uses the old ABI (< 15.10),
+    // we need to run the scope inside a container/chroot.
+    exec_in_container_ = new_abi_ &&
+                         (
+                             exec_data_.framework_major < 15 ||
+                             (exec_data_.framework_major == 15 && exec_data_.framework_minor < 10)
+                         );
 }
 
 RegistryObject::ScopeProcess::~ScopeProcess()

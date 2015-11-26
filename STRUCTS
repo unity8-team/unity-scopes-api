@@ -81,6 +81,8 @@ ScopeMetadata (returned by serialize()):
  'version'               : int, optional
  'keywords'              : set of strings, optional
  'is_aggregator'         : bool, optional
+ 'framework_major'       : int, optional
+ 'framework_minor'       : int, optional
 
 Query (returned by serialize())
 ===============================

@@ -49,6 +49,7 @@ public:
     bool invisible() const;                // Optional, returns false if not present
     std::string framework() const;         // Optional, returns default value if not present
     int framework_major() const;           // Optional, returns default value if not present
+    int framework_minor() const;           // Optional, returns default value if not present
     std::string scope_runner() const;      // Optional, throws NotFoundException if not present
     int idle_timeout() const;              // Optional, returns default value if not present
     bool location_data_needed() const;     // Optional, returns false if not present
@@ -78,6 +79,7 @@ private:
     int idle_timeout_;
     std::string framework_;
     int framework_major_;
+    int framework_minor_;
     ScopeMetadata::ResultsTtlType results_ttl_type_;
     bool debug_mode_;
     std::vector<std::string> child_scope_ids_;

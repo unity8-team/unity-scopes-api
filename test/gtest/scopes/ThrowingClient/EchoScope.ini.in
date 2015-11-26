@@ -2,4 +2,4 @@
 DisplayName = EchoScope
 Description = Echo scope. Returns a single result containing the query string.
 Author = Michi
-Framework = 15.04
+Framework = 15.10

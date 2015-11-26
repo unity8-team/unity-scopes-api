@@ -311,6 +311,7 @@ void add_local_scope(RegistryObject::SPtr const& registry,
     mi->set_child_scope_ids(sc.child_scope_ids());
     mi->set_version(sc.version());
     mi->set_framework_major(sc.framework_major());
+    mi->set_framework_minor(sc.framework_minor());
     mi->set_keywords(sc.keywords());
     mi->set_is_aggregator(sc.is_aggregator());
 
@@ -411,6 +412,7 @@ void add_local_scope(RegistryObject::SPtr const& registry,
     exec_data.scope_config = scope.second;
     exec_data.debug_mode = sc.debug_mode();
     exec_data.framework_major = meta.framework_major();
+    exec_data.framework_minor = meta.framework_minor();
 
     registry->add_local_scope(scope.first, std::move(meta), exec_data);
 }

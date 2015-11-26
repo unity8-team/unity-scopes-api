@@ -99,6 +99,8 @@ public:
     ScopeMetadataBuilder& version(Optional<int> const& value);
     ScopeMetadataBuilder& keywords(Optional<std::set<std::string>> const& value);
     ScopeMetadataBuilder& is_aggregator(Optional<bool> const& value);
+    ScopeMetadataBuilder& framework_major(Optional<int> const& value);
+    ScopeMetadataBuilder& framework_minor(Optional<int> const& value);
 
     ScopeMetadata operator()() const;
 

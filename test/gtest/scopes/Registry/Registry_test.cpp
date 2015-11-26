@@ -125,6 +125,8 @@ TEST(Registry, metadata)
     EXPECT_NE(keywords.end(), keywords.find("news"));
     EXPECT_NE(keywords.end(), keywords.find("foo"));
     EXPECT_FALSE(meta.is_aggregator());
+    EXPECT_EQ(16, meta.framework_major());
+    EXPECT_EQ(4, meta.framework_minor());
 
     auto attrs = meta.appearance_attributes();
     EXPECT_EQ("fg_color", attrs["foreground-color"].get_string());
@@ -181,6 +183,8 @@ TEST(Registry, metadata)
     EXPECT_EQ(3, meta.keywords().size());
     EXPECT_EQ(1, meta.version());
     EXPECT_FALSE(meta.is_aggregator());
+    EXPECT_EQ(14, meta.framework_major());
+    EXPECT_EQ(4, meta.framework_minor());
 }
 
 auto const wait_for_update_time = std::chrono::milliseconds(5000);

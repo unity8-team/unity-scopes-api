@@ -2,4 +2,6 @@
 DisplayName = AggTestScope
 Description = Aggregator scope that makes various loops
 Author = Michi
-Framework = 15.04
+
+# Trailing characters after the minor version number are OK.
+Framework = 15.10-abc

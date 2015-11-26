@@ -1287,6 +1287,7 @@ following keys:
     IdleTimeout = idle timeout in seconds
     LocationDataNeeded = true or false
     ScopeRunner = path_to_scope_runner args... %R %S
+    Framework = 16.04
 
     [Appearance]
     ForegroundColor = default text color (defaults to theme-provided foreground color)
@@ -1347,6 +1348,12 @@ For example, the following setting causes a scope to be run under `gdb`:
 `ScopeRunner = /usr/bin/gdb --ex run --args /usr/lib/x86_64-linux-gnu/unity-scopes/scoperunner %R %S`
 
 The `%R` expands to the path to the `Runtime.ini` config file, and `%S` expands to the scope's `.ini` file.
+
+The `Framework` key defines which framework the scope was compiled with. If not set, the default value is `14.04`.
+This key informs the registry which C++ standard library ABI (gcc 4.9 or gcc 5.2) was used to compile the scope.
+Up to version `15.04` implies the gcc 4.9 ABI; anything from `15.10` onwards implies the gcc 5.2 ABI.
+Note that, once you compile a scope with the new ABI, you _must_ add a `Framework` key with a
+value `15.10` or greater, otherwise your scope cannot be started by the registry.
 
 The `Appearance` group and all keys within it are optional and can be used to customize the look of the scope.
 Some of the `Appearance` keys (such as `PageHeader.Background`) require background scheme URIs.

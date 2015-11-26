@@ -176,7 +176,7 @@ ScopeConfig::ScopeConfig(string const& configfile) :
 
     idle_timeout_ = get_optional_int(scope_config_group, idle_timeout_key, DFLT_SCOPE_IDLE_TIMEOUT);
 
-    // Framework must be of the form <number>.<something>
+    // Framework must be of the form <number>.<number><something>
     framework_ = get_optional_string(scope_config_group, framework_key, DFLT_FRAMEWORK);
     {
         vector<string> parts;
@@ -185,26 +185,31 @@ ScopeConfig::ScopeConfig(string const& configfile) :
         {
             throw_ex("Illegal value (" + framework_ + ") for " + framework_key + ": missing '.' separator");
         }
-        size_t pos = string::npos;
+        size_t major_pos = string::npos;
         try
         {
-            framework_major_ = std::stoi(parts[0], &pos);
-            if (framework_major_ < 14)
-            {
-                throw_ex("Illegal value (" + framework_ + ") for " + framework_key + ": " +
-                         " major version must be at least 14");
-            }
+            framework_major_ = std::stoi(parts[0], &major_pos);
+            framework_minor_ = std::stoi(parts[1]);  // It's OK if there are trailing non-digits.
         }
         catch (std::exception const& e)
         {
             throw_ex("Illegal value (" + framework_ + ") for " + framework_key + ": not a number");
         }
-        if (pos != parts[0].size())
+        if (framework_major_ < 14)
+        {
+            throw_ex("Illegal value (" + framework_ + ") for " + framework_key +
+                     ": major version must be at least 14");
+        }
+        if (major_pos != parts[0].size())
         {
             throw_ex("Illegal value (" + framework_ + ") for " + framework_key + ": not a number");
         }
+        if (framework_minor_ < 0)
+        {
+            throw_ex("Illegal value (" + framework_ + ") for " + framework_key +
+                     ": minor version must be at least 0");
+        }
     }
-
 
     // Negative values and values greater than max int (once multiplied by 1000 (s to ms)) are illegal
     const int max_idle_timeout = std::numeric_limits<int>::max() / 1000;
@@ -518,6 +523,11 @@ string ScopeConfig::framework() const
 int ScopeConfig::framework_major() const
 {
     return framework_major_;
+}
+
+int ScopeConfig::framework_minor() const
+{
+    return framework_minor_;
 }
 
 ScopeMetadata::ResultsTtlType ScopeConfig::results_ttl_type() const

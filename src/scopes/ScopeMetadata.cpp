@@ -172,6 +172,11 @@ int ScopeMetadata::framework_major() const
     return p->framework_major();
 }
 
+int ScopeMetadata::framework_minor() const
+{
+    return p->framework_minor();
+}
+
 //! @endcond
 
 } // namespace scopes

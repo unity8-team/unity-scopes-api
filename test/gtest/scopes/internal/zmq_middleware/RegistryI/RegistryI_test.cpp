@@ -427,6 +427,8 @@ public:
             mi->set_author("Canonical Ltd.");
             mi->set_proxy(proxies[scope_id]);
             mi->set_scope_directory("/foo");
+            mi->set_framework_major(16);
+            mi->set_framework_minor(4);
             auto meta = ScopeMetadataImpl::create(move(mi));
 
             RegistryObject::ScopeExecData exec_data;
@@ -435,6 +437,8 @@ public:
             exec_data.runtime_config = runtime_ini;
             exec_data.scope_config = DEMO_DIR "/scopes/" + scope_id + "/" + scope_id + ".ini";
             exec_data.timeout_ms = process_timeout;
+            exec_data.framework_major = 16;
+            exec_data.framework_minor = 4;
 
             reg->add_local_scope(scope_id, move(meta), exec_data);
         }
@@ -480,6 +484,8 @@ public:
         mi->set_author("Canonical Ltd.");
         mi->set_proxy(test_proxy);
         mi->set_scope_directory("/foo");
+        mi->set_framework_major(16);
+        mi->set_framework_minor(4);
         auto meta = ScopeMetadataImpl::create(move(mi));
 
         RegistryObject::ScopeExecData exec_data;
@@ -488,6 +494,8 @@ public:
         exec_data.runtime_config = runtime_ini;
         exec_data.scope_config = test_scope_config;
         exec_data.timeout_ms = process_timeout;
+        exec_data.framework_major = 16;
+        exec_data.framework_minor = 4;
 
         reg->add_local_scope(test_scope_id, move(meta), exec_data);
 

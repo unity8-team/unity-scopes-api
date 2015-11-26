@@ -48,6 +48,7 @@ TEST(ScopeConfig, basic)
         EXPECT_EQ(300, cfg.idle_timeout());
         EXPECT_EQ("16.04", cfg.framework());
         EXPECT_EQ(16, cfg.framework_major());
+        EXPECT_EQ(4, cfg.framework_minor());
         EXPECT_EQ(ScopeMetadata::ResultsTtlType::Large, cfg.results_ttl_type());
         EXPECT_TRUE(cfg.location_data_needed());
         EXPECT_TRUE(cfg.debug_mode());
@@ -95,6 +96,7 @@ TEST(ScopeConfig, basic)
         EXPECT_EQ(DFLT_SCOPE_IDLE_TIMEOUT, cfg.idle_timeout());
         EXPECT_EQ("14.04", cfg.framework());
         EXPECT_EQ(14, cfg.framework_major());
+        EXPECT_EQ(4, cfg.framework_minor());
         EXPECT_EQ(ScopeMetadata::ResultsTtlType::None, cfg.results_ttl_type());
         EXPECT_FALSE(cfg.location_data_needed());
         EXPECT_FALSE(cfg.debug_mode());
@@ -275,16 +277,30 @@ TEST(ScopeConfig, framework_no_parse)
     }
 }
 
-TEST(ScopeConfig, framework_bad_version)
+TEST(ScopeConfig, framework_bad_major_version)
 {
     try
     {
-        ScopeConfig cfg(FRAMEWORK_BAD_VERSION);
+        ScopeConfig cfg(FRAMEWORK_BAD_MAJOR_VERSION);
         FAIL();
     }
     catch(ConfigException const& e)
     {
-        boost::regex r("unity::scopes::ConfigException: \".*\": Illegal value \\(13\\.10\\) for Framework:  major version must be at least 14");
+        boost::regex r("unity::scopes::ConfigException: \".*\": Illegal value \\(13\\.10\\) for Framework: major version must be at least 14");
+        EXPECT_TRUE(boost::regex_match(e.what(), r)) << e.what();
+    }
+}
+
+TEST(ScopeConfig, framework_bad_minor_version)
+{
+    try
+    {
+        ScopeConfig cfg(FRAMEWORK_BAD_MINOR_VERSION);
+        FAIL();
+    }
+    catch(ConfigException const& e)
+    {
+        boost::regex r("unity::scopes::ConfigException: \".*\": Illegal value \\(14\\.-1\\) for Framework: minor version must be at least 0");
         EXPECT_TRUE(boost::regex_match(e.what(), r));
     }
 }

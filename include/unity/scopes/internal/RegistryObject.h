@@ -49,6 +49,7 @@ public:
         std::string scope_id;
         std::string custom_exec;
         int framework_major;
+        int framework_minor;
         std::string scoperunner_path;
         std::string runtime_config;
         std::string scope_config;

@@ -145,6 +145,8 @@ protected:
         mi->set_search_hint("search hint " + scope_id);
         mi->set_hot_key("hot key " + scope_id);
         mi->set_scope_directory("/foo");
+        mi->set_framework_major(16);
+        mi->set_framework_minor(4);
 
         mi->set_proxy(make_shared<StrictMock<MockScope>>());
 
@@ -177,6 +179,8 @@ protected:
         exec_data.scope_config = "scope.ini";
         exec_data.confinement_profile = confinement_profile;
         exec_data.timeout_ms = 1500;
+        exec_data.framework_major = 16;
+        exec_data.framework_minor = 4;
 
         registry.reset(new RegistryObject(*death_observer(), executor, nullptr, "container-cmd"));
         registry->add_local_scope("scope-id", meta, exec_data);

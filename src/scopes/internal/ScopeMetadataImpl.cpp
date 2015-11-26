@@ -40,6 +40,7 @@ ScopeMetadataImpl::ScopeMetadataImpl(MiddlewareBase* mw)
     , results_ttl_type_(ScopeMetadata::ResultsTtlType::None)
     , version_(0)
     , framework_major_(14)
+    , framework_minor_(4)
 {
 }
 
@@ -48,6 +49,7 @@ ScopeMetadataImpl::ScopeMetadataImpl(const VariantMap& variant_map, MiddlewareBa
     , results_ttl_type_(ScopeMetadata::ResultsTtlType::None)
     , version_(0)
     , framework_major_(14)
+    , framework_minor_(4)
 {
     deserialize(variant_map);
 }
@@ -65,6 +67,7 @@ ScopeMetadataImpl::ScopeMetadataImpl(ScopeMetadataImpl const& other)
     , version_(other.version_)
     , keywords_(other.keywords_)
     , framework_major_(other.framework_major_)
+    , framework_minor_(other.framework_minor_)
 {
     if (other.art_)
     {
@@ -129,6 +132,7 @@ ScopeMetadataImpl& ScopeMetadataImpl::operator=(ScopeMetadataImpl const& rhs)
         keywords_ = rhs.keywords_;
         is_aggregator_.reset(rhs.is_aggregator_ ? new bool(*rhs.is_aggregator_) : nullptr);
         framework_major_ = rhs.framework_major_;
+        framework_minor_ = rhs.framework_minor_;
     }
     return *this;
 }
@@ -269,6 +273,11 @@ int ScopeMetadataImpl::framework_major() const
     return framework_major_;
 }
 
+int ScopeMetadataImpl::framework_minor() const
+{
+    return framework_minor_;
+}
+
 void ScopeMetadataImpl::set_scope_id(std::string const& scope_id)
 {
     scope_id_ = scope_id;
@@ -359,6 +368,16 @@ void ScopeMetadataImpl::set_framework_major(int major_version)
     framework_major_ = major_version;
 }
 
+void ScopeMetadataImpl::set_framework_minor(int minor_version)
+{
+    if (minor_version < 0)
+    {
+        throw InvalidArgumentException("ScopeMetadata::set_framework_minor(): invalid version: " +
+                                       std::to_string(minor_version));
+    }
+    framework_minor_ = minor_version;
+}
+
 void ScopeMetadataImpl::set_child_scope_ids(std::vector<std::string> const& ids)
 {
     child_scope_ids_ = ids;
@@ -413,6 +432,7 @@ VariantMap ScopeMetadataImpl::serialize() const
     var["author"] = author_;
     var["version"] = version_;
     var["framework_major"] = framework_major_;
+    var["framework_minor"] = framework_minor_;
 
     // Optional fields
     if (art_)
@@ -545,13 +565,20 @@ void ScopeMetadataImpl::deserialize(VariantMap const& var)
                                        + std::to_string(version_));
     }
 
-    // Framework_major was added in 1.0.3. Similar story as for version.
+    // Framework_major and framework_minor were added in 1.0.3. Similar story as for version.
     it = var.find("framework_major");
     framework_major_ = it != var.end() ? it->second.get_int() : 14;
     if (framework_major_ < 14)
     {
         throw InvalidArgumentException("ScopeMetadataImpl::deserialize(): invalid attribute 'framework_major' with value "
                                        + std::to_string(framework_major_));
+    }
+    it = var.find("framework_minor");
+    framework_minor_ = it != var.end() ? it->second.get_int() : 4;
+    if (framework_minor_ < 0)
+    {
+        throw InvalidArgumentException("ScopeMetadataImpl::deserialize(): invalid attribute 'framework_minor' with value "
+                                       + std::to_string(framework_minor_));
     }
 
     it = var.find("art");

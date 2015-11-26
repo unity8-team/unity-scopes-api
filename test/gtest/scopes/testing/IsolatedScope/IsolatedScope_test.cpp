@@ -115,7 +115,9 @@ TEST(ScopeMetadataBuilder, construct_full)
         .child_scope_ids(child_scope_ids)
         .version(42)
         .keywords(keywords)
-        .is_aggregator(true);
+        .is_aggregator(true)
+        .framework_major(99)
+        .framework_minor(89);
     unity::scopes::ScopeMetadata metadata = builder();
     EXPECT_EQ(scope_id, metadata.scope_id());
     EXPECT_EQ("display_name", metadata.display_name());
@@ -135,6 +137,8 @@ TEST(ScopeMetadataBuilder, construct_full)
     EXPECT_EQ(42, metadata.version());
     EXPECT_EQ(keywords, metadata.keywords());
     EXPECT_TRUE(metadata.is_aggregator());
+    EXPECT_EQ(99, metadata.framework_major());
+    EXPECT_EQ(89, metadata.framework_minor());
 }
 
 TEST(ScopeMetadataBuilder, construction_in_case_of_missing_mandatory_arguments_aborts)

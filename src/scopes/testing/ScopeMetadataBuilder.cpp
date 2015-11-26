@@ -50,6 +50,8 @@ struct testing::ScopeMetadataBuilder::Private
     Optional<int> version;
     Optional<std::set<std::string>> keywords;
     Optional<bool> is_aggregator;
+    Optional<int> framework_major;
+    Optional<int> framework_minor;
 };
 
 testing::ScopeMetadataBuilder::ScopeMetadataBuilder() : p(new Private())
@@ -174,6 +176,18 @@ testing::ScopeMetadataBuilder& testing::ScopeMetadataBuilder::is_aggregator(Opti
     return *this;
 }
 
+testing::ScopeMetadataBuilder& testing::ScopeMetadataBuilder::framework_major(Optional<int> const& value)
+{
+    p->framework_major = value;
+    return *this;
+}
+
+testing::ScopeMetadataBuilder& testing::ScopeMetadataBuilder::framework_minor(Optional<int> const& value)
+{
+    p->framework_minor = value;
+    return *this;
+}
+
 unity::scopes::ScopeMetadata testing::ScopeMetadataBuilder::operator()() const
 {
     auto impl = new unity::scopes::internal::ScopeMetadataImpl(Private::invalid_middleware);
@@ -211,6 +225,10 @@ unity::scopes::ScopeMetadata testing::ScopeMetadataBuilder::operator()() const
         impl->set_keywords(*p->keywords);
     if (p->is_aggregator)
         impl->set_is_aggregator(*p->is_aggregator);
+    if (p->framework_major)
+        impl->set_framework_major(*p->framework_major);
+    if (p->framework_minor)
+        impl->set_framework_minor(*p->framework_minor);
 
     return unity::scopes::internal::ScopeMetadataImpl::create(
                 std::move(

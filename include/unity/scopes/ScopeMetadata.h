@@ -227,6 +227,12 @@ public:
     */
     int framework_major() const;
 
+    /**
+    \brief Return the minor version of the framework for this scope.
+    \return The minor version, such as `4` for framework `15.04`.
+    */
+    int framework_minor() const;
+
 private:
     ScopeMetadata(std::unique_ptr<internal::ScopeMetadataImpl>);           // Instantiable only by ScopeMetadataImpl
     std::unique_ptr<internal::ScopeMetadataImpl> p;
