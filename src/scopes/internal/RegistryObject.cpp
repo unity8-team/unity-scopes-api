@@ -408,14 +408,14 @@ std::string RegistryObject::desktop_files_dir()
 {
     // First check if a test directory has been set
     const char* desktop_files_dir = getenv("TEST_DESKTOP_FILES_DIR");
-    if (desktop_files_dir)
+    if (desktop_files_dir && *desktop_files_dir != '\0')
     {
         return desktop_files_dir;
     }
 
     // If no test directory has been set, get the regular applications dir
     desktop_files_dir = getenv("HOME");
-    if (!desktop_files_dir)
+    if (!desktop_files_dir || *desktop_files_dir == '\0')
     {
         throw unity::scopes::ConfigException("RegistryObject: HOME not set");
     }

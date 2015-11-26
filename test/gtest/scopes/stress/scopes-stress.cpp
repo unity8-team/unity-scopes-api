@@ -140,6 +140,8 @@ int main(int argc, char* argv[])
 {
     ::testing::InitGoogleTest(&argc, argv);
 
+    putenv(const_cast<char*>("TEST_DESKTOP_FILES_DIR=" TEST_DESKTOP_FILES_DIR));
+
     int rc = 0;
     auto rpid = fork();
     if (rpid == 0)
