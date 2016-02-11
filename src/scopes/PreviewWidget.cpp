@@ -204,7 +204,6 @@ List of attributes:
 \arg \c subtitle A string specifying the subtitle
 \arg \c mascot A URI specifying the mascot
 \arg \c fallback A fallback image to be used if the mascot URI cannot be retrieved (default: none)
-\arg \c emblem A URI specifying the emblem
 
 \code{.cpp}
 {
