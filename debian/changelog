@@ -1,4 +1,4 @@
-unity-scopes-api (1.0.4+16.04.20160313-0ubuntu1) UNRELEASED; urgency=medium
+unity-scopes-api (1.0.4+16.04.20160313-0ubuntu1) xenial; urgency=medium
 
   [ Pawel Stolowski ]
   * New RangeInputFilter.
@@ -9,7 +9,7 @@ unity-scopes-api (1.0.4+16.04.20160313-0ubuntu1) UNRELEASED; urgency=medium
   [ Robert Bruce Park ]
   * Simplify debian/control munging
 
- -- Robert Bruce Park <robert.park@canonical.com>  Sun, 13 Mar 2016 03:46:49 +0000
+ -- Robert Bruce Park <robert.park@canonical.com>  Sun, 13 Mar 2016 03:46:50 +0000
 
 unity-scopes-api (1.0.3+16.04.20160209-0ubuntu1) xenial; urgency=medium
 
