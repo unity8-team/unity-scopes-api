@@ -1,12 +1,75 @@
-unity-scopes-api (1.0.4-0ubuntu1) UNRELEASED; urgency=medium
+unity-scopes-api (1.0.4+16.04.20160318-0ubuntu1) xenial; urgency=medium
 
   [ Pawel Stolowski ]
   * New RangeInputFilter.
+  * Added doc for comment, comment-input and icon-actions widgets.
+  * Added documentation for share-data attribute used for content
+    sharing with Content hub.
+  * Apply various constraints to extra labels in ValueSliderFilter.
+  * Changes to ValueSlider filter.
+  * Disable tests when building on ppc and ppc64el.
+  * Disabled IsolatedScopeBenchmark test as it's too flaky and hard to
+    fix. Also temporarily disabled ABI test due to abigail bugs.
+  * Documentation for inline playback and concierge mode. (LP: #1542216)
+  * Don't set cardinality in the scopes-client. (LP: #1545801)
+  * Fix for the revert of 644, accidently commited a modified
+    debian/control
+  * Only allow Primary flag to be set for single-selection
+    OptionSelector (throw for others).
+  * Return default values for filters when no value is present in the
+    filter state.
+  * Reverted rev. 644 (Change to child scopes config file)
 
   [ Michi Henning ]
   * Changed ABI compliance testing to use abigail.
+  * Added ABI compliance check for Wily and later. (For Vivid, we still
+    use the symbols file for the time being.).
+  * Added devscripts to build dependencies.
+  * Added doc about how method calls are partitioned onto threads. (LP:
+    #1273641)
+  * Added missing initializations to TypedScopeFixture. (LP: #1542906)
+  * Butchered down the dummy control file to the bare bones, so no-one
+    will mistake it for the real thing.
+  * Doc updates to clarify semantics of fallback images. (LP: #1531913)
+  * Fix for crash in libjsoncpp. (LP: #1494796)
+  * Fixed a bunch of bogus errors from abi-compliance-checker about
+    failed compilations due to incorrectly defined macros, trying to
+    compile makefiles, and the like. Runs faster now too because it
+    doesn't have to check as much.
+  * Fixed incorrect log dir path when LogDir is not set.
+  * Fixed two build warnings.
+  * Light copy edit of filter doc.
+  * Look for clang-format as opposed to clang-format-3.x.
+  * Removed boost log and replaced it with a simple logger that writes
+    to std::clog. This should get rid of the crashes due to undefined
+    global destructor ordering when boost log finalises it's global
+    state. (LP: #1472755)
+  * The child scopes repository now lives in the cache dir instead of
+    the config dir.
+  * Updated doc to make it clear that generating unique category IDs for
+    each query is a bad idea. (LP: #1238979)
 
- -- Pawel Stolowski <pawel.stolowski@canonical.com>  Mon, 11 Jan 2016 12:06:29 +0100
+  [ Alberto Mardegan ]
+  * Allow clients to specify authentication parameters. (LP: #1554040)
+
+  [ CI Train Bot ]
+  * Allow clients to specify authentication parameters (LP: #1554040)
+
+  [ Marcus Tomlinson ]
+  * Fixed Clang compiler warnings such as: missing "override" specifier,
+    unused variables and functions, and other small bits of suspicious
+    logic.
+  * Fixed QueryMetadata tests that were checking the incorrect metadata
+    for copied internet_connectivity statuses.
+  * Loop through each argument of the custom scope runner command and
+    ensure that all path arguments are absolute.
+  * Protect all JsonCppNode::get_node() methods with a "if (!root_)
+    throw;" check. (LP: #1494796)
+
+  [ Robert Bruce Park ]
+  * Simplify debian/control munging.
+
+ -- David Barth <david.barth@canonical.com>  Fri, 18 Mar 2016 12:39:52 +0000
 
 unity-scopes-api (1.0.3+16.04.20160209-0ubuntu1) xenial; urgency=medium
 
