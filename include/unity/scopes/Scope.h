@@ -189,6 +189,10 @@ public:
             std::string const& action_id,
             ActivationListenerBase::SPtr const& reply) = 0;
 
+    virtual QueryCtrlProxy result_for_key(std::string const& key,
+                                          SearchMetadata const& metadata,
+                                          SearchListenerBase::SPtr const& reply) = 0;
+
 protected:
     /// @cond
     Scope();

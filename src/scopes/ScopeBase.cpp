@@ -72,6 +72,11 @@ ActivationQueryBase::UPtr ScopeBase::activate_result_action(Result const& result
     return ActivationQueryBase::UPtr(new ActivationQueryBase(result, metadata, action_id)); // default impl returns NotHandled
 }
 
+SearchQueryBase::UPtr ScopeBase::result_for_key(CannedQuery const& query, SearchMetadata const& metadata)
+{
+    return nullptr;
+}
+
 void ScopeBase::runtime_version(int& v_major, int& v_minor, int& v_micro) noexcept
 {
     v_major = unity::scopes::major_version();

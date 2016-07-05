@@ -107,6 +107,10 @@ public:
 
     virtual ChildScopeList child_scopes() override;
     virtual bool set_child_scopes(ChildScopeList const& child_scopes) override;
+    virtual QueryCtrlProxy result_for_key(std::string const& key,
+                                          SearchMetadata const& metadata,
+                                          SearchListenerBase::SPtr const& reply) override;
+
 
     static ScopeProxy create(MWScopeProxy const& mw_proxy, std::string const& scope_id);
 

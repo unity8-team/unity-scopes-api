@@ -59,6 +59,8 @@ public:
     void set_user_data(Variant const& value);
     bool has_user_data() const;
     Variant user_data() const;
+    void set_result_key(std::string const &key);
+    std::string result_key() const;
 
     static const std::string scopes_schema;
 
@@ -67,6 +69,7 @@ private:
     std::string scope_id_;
     std::string query_string_;
     std::string department_id_;
+    std::string key_;
     FilterState filter_state_;
     std::unique_ptr<Variant> user_data_;
 };

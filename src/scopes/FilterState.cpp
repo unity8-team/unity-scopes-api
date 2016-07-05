@@ -78,6 +78,11 @@ void FilterState::remove(std::string const& id)
     p->remove(id);
 }
 
+bool FilterState::has_filters() const
+{
+    return p->has_filters();
+}
+
 } // namespace scopes
 
 } // namespace unity

@@ -128,6 +128,16 @@ Variant CannedQuery::user_data() const
     return p->user_data();
 }
 
+void CannedQuery::set_result_key(std::string const &key)
+{
+    p->set_result_key(key);
+}
+
+std::string CannedQuery::result_key() const
+{
+    return p->result_key();
+}
+
 } // namespace scopes
 
 } // namespace unity

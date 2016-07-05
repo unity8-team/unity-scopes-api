@@ -340,6 +340,14 @@ SearchQueryBase::UPtr SmartScope::search(std::string const& scope_id, CannedQuer
     return query;
 }
 
+SearchQueryBase::UPtr SmartScope::result_for_key(std::string const& scope_id, CannedQuery const& q, SearchMetadata const& hints)
+{
+    SearchQueryBase::UPtr query(new SmartQuery(scope_id, reg_, q, hints));
+    ss_client_->logger()(LoggerSeverity::Info)
+        << "SmartScope: created result-for-key query for \"" << scope_id << "\": \"" << q.result_key() << "\"";
+    return query;
+}
+
 QueryBase::UPtr SmartScope::preview(std::string const& scope_id, Result const& result, ActionMetadata const& hints)
 {
     QueryBase::UPtr preview(new SmartPreview(scope_id, reg_, result, hints));

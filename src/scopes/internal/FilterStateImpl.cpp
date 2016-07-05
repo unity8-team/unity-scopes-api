@@ -82,6 +82,11 @@ FilterState FilterStateImpl::deserialize(VariantMap const& var)
     return FilterState(new FilterStateImpl(var));
 }
 
+bool FilterStateImpl::has_filters() const
+{
+    return state_.size() > 0;
+}
+
 } // namespace internal
 
 } // namespace scopes

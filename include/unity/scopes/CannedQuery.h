@@ -159,6 +159,16 @@ public:
     */
     Variant user_data() const;
 
+    /**
+      TODO
+      */
+    void set_result_key(std::string const &key);
+
+    /**
+      TODO
+      */
+    std::string result_key() const;
+
 private:
     CannedQuery(internal::CannedQueryImpl *impl);
     std::unique_ptr<internal::CannedQueryImpl> p;

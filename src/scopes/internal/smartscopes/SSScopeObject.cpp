@@ -73,7 +73,8 @@ MWQueryCtrlProxy SSScopeObject::search(CannedQuery const& q,
                  reply,
                  [&q, &hints, &info, this ]()->SearchQueryBase::SPtr
                      {
-                        SearchQueryBase::SPtr search_query = this->smartscope_->search(info.id, q, hints);
+                        SearchQueryBase::SPtr search_query = q.result_key().empty() ? this->smartscope_->result_for_key(info.id, q, hints)
+                                                                             : this->smartscope_->search(info.id, q, hints);
                         search_query->set_department_id(q.department_id());
                         return search_query;
                      },

@@ -78,6 +78,10 @@ public:
                     SearchMetadata const&,
                     SearchListenerBase::SPtr const&));
 
+    MOCK_METHOD3(result_for_key, QueryCtrlProxy(std::string const&,
+                    SearchMetadata const&,
+                    SearchListenerBase::SPtr const&));
+
     MOCK_METHOD3(activate, QueryCtrlProxy(Result const&,
                     ActionMetadata const&,
                     ActivationListenerBase::SPtr const&));

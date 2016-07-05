@@ -44,6 +44,7 @@ public:
     Variant get(std::string const& filter_id) const;
     VariantMap& get();
     VariantMap serialize() const;
+    bool has_filters() const;
     static FilterState deserialize(VariantMap const& var);
 
 private:

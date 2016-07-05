@@ -375,6 +375,15 @@ public:
 protected:
     /// @cond
     ScopeBase();
+
+public:
+    /**
+    \brief TODO
+    TODO: document
+    // FIXME: do we need metadata?
+    */
+    virtual SearchQueryBase::UPtr result_for_key(CannedQuery const& query, SearchMetadata const& metadata);
+
 private:
     std::unique_ptr<internal::ScopeBaseImpl> p;
 

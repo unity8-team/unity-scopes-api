@@ -62,6 +62,7 @@ CannedQueryImpl::CannedQueryImpl(CannedQueryImpl const &other)
     query_string_ = other.query_string_;
     department_id_ = other.department_id_;
     filter_state_ = other.filter_state_;
+    key_ = other.key_;
     if (other.user_data_ != nullptr)
     {
         user_data_.reset(new Variant(*other.user_data_));
@@ -104,6 +105,12 @@ CannedQueryImpl::CannedQueryImpl(VariantMap const& variant)
     if (it != variant.end())
     {
         set_user_data(it->second);
+    }
+
+    it = variant.find("result_key");
+    if (it != variant.end())
+    {
+        set_result_key(it->second.get_string());
     }
 }
 
@@ -304,6 +311,10 @@ CannedQuery CannedQueryImpl::from_uri(std::string const& uri)
                     internal::JsonCppNode const node(data_json);
                     q.set_user_data(node.to_variant());
                 }
+                else if (key == "rkey")
+                {
+                    q.set_result_key(decode_or_throw(val, key, uri));
+                }
                 // else - unknown keys are ignored
             } // else - the string with no '=' is ignored
         }
@@ -311,6 +322,25 @@ CannedQuery CannedQueryImpl::from_uri(std::string const& uri)
 
     return q;
 }
+
+void CannedQueryImpl::set_result_key(std::string const &key)
+{
+    if (filter_state_.has_filters() || !(department_id_.empty() && query_string_.empty()))
+    {
+        throw LogicException("CannedQuery(): result key and either: query string, department id, filter state are mutually exclusive");
+    }
+    if (key.empty())
+    {
+        throw InvalidArgumentException("CannedQuery(): result key cannot be empty");
+    }
+    key_ = key;
+}
+
+std::string CannedQueryImpl::result_key() const
+{
+    return key_;
+}
+
 
 } // namespace internal
 

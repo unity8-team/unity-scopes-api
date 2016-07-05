@@ -195,6 +195,15 @@ QueryCtrlProxy ScopeImpl::search(CannedQuery const& query,
     return ctrl;
 }
 
+QueryCtrlProxy ScopeImpl::result_for_key(std::string const& key,
+                                         SearchMetadata const& metadata,
+                                         SearchListenerBase::SPtr const& reply)
+{
+    CannedQuery query(scope_id_);
+    query.set_result_key(key);
+    return search(query, metadata, SearchQueryBaseImpl::History(), reply);
+}
+
 QueryCtrlProxy ScopeImpl::activate(Result const& result,
                                    ActionMetadata const& metadata,
                                    ActivationListenerBase::SPtr const& reply)

@@ -89,6 +89,7 @@ public:
     SmartScope(SSRegistryObject::SPtr reg);
 
     SearchQueryBase::UPtr search(std::string const& scope_id, CannedQuery const& q, SearchMetadata const& hints);
+    SearchQueryBase::UPtr result_for_key(std::string const& scope_id, CannedQuery const& q, SearchMetadata const& metadata);
     QueryBase::UPtr preview(std::string const& scope_id, Result const& result, ActionMetadata const& hints);
     ActivationQueryBase::UPtr activate(std::string const&, Result const& result, ActionMetadata const& metadata);
     ActivationQueryBase::UPtr perform_action(std::string const& scope_id, Result const& result, ActionMetadata const& metadata, std::string const& widget_id, std::string const& action_id);

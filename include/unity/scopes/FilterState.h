@@ -81,6 +81,12 @@ public:
     */
     void remove(std::string const& id);
 
+    /**
+    \brief Check if this state object has any filters.
+    \return True if this state is not empty.
+    */
+    bool has_filters() const;
+
 private:
     FilterState(internal::FilterStateImpl *pimpl);
     std::unique_ptr<internal::FilterStateImpl> p;
