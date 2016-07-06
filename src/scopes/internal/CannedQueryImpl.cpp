@@ -83,11 +83,10 @@ CannedQueryImpl::CannedQueryImpl(VariantMap const& variant)
     }
 
     it = variant.find("filter_state");
-    if (it == variant.end())
+    if (it != variant.end())
     {
-        throw InvalidArgumentException("CannedQuery(): filter_state is missing");
+        filter_state_ = internal::FilterStateImpl::deserialize(it->second.get_dict());
     }
-    filter_state_ = internal::FilterStateImpl::deserialize(it->second.get_dict());
 
     it = variant.find("department_id");
     if (it != variant.end())
@@ -192,9 +191,17 @@ VariantMap CannedQueryImpl::serialize() const
 {
     VariantMap vm;
     vm["scope"] = scope_id_;
-    vm["query_string"] = query_string_;
-    vm["department_id"] = department_id_;
-    vm["filter_state"] = filter_state_.serialize();
+    if (key_.empty())
+    {
+        vm["query_string"] = query_string_;
+        vm["department_id"] = department_id_;
+        vm["filter_state"] = filter_state_.serialize();
+    }
+    else
+    {
+        vm["result_key"] = key_;
+    }
+
     if (user_data_)
     {
         vm["user_data"] = *user_data_;
@@ -206,19 +213,26 @@ std::string CannedQueryImpl::to_uri() const
 {
     std::ostringstream s;
     s << scopes_schema << scope_id_;
-    s << "?q=" << to_percent_encoding(query_string_);
-
-    if (!department_id_.empty())
+    if (key_.empty())
     {
-        s << "&dep=" << to_percent_encoding(department_id_);
+        s << "?q=" << to_percent_encoding(query_string_);
+
+        if (!department_id_.empty())
+        {
+            s << "&dep=" << to_percent_encoding(department_id_);
+        }
+
+        auto filters_var = filter_state_.serialize();
+        if (filters_var.size())
+        {
+            Variant const var(filters_var);
+            internal::JsonCppNode const jstr(var);
+            s << "&filters=" << to_percent_encoding(jstr.to_json_string());
+        }
     }
-
-    auto filters_var = filter_state_.serialize();
-    if (filters_var.size())
+    else
     {
-        Variant const var(filters_var);
-        internal::JsonCppNode const jstr(var);
-        s << "&filters=" << to_percent_encoding(jstr.to_json_string());
+        s << "?rkey=" << to_percent_encoding(key_);
     }
     if (user_data_)
     {

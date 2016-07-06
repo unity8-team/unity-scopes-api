@@ -27,4 +27,6 @@ public:
                                                         unity::scopes::SearchMetadata const&) override;
     virtual unity::scopes::PreviewQueryBase::UPtr preview(unity::scopes::Result const&,
                                                           unity::scopes::ActionMetadata const&) override;
+    virtual unity::scopes::SearchQueryBase::UPtr result_for_key(unity::scopes::CannedQuery const& query,
+                                                        unity::scopes::SearchMetadata const& metadata) override;
 };

@@ -166,6 +166,59 @@ private:
     std::shared_ptr<Result> last_result_;
 };
 
+class SingleResultReceiver: public SearchListenerBase
+{
+public:
+    SingleResultReceiver() :
+        query_complete_(false),
+        count_(0)
+    {
+    }
+
+    virtual void push(Department::SCPtr const& parent) override
+    {
+        FAIL();
+    }
+
+    virtual void push(CategorisedResult result) override
+    {
+        EXPECT_EQ("uri", result.uri());
+        EXPECT_EQ("title (result by key)", result.title());
+        count_++;
+    }
+
+    virtual void finished(CompletionDetails const& details) override
+    {
+        EXPECT_EQ(CompletionDetails::OK, details.status());
+        EXPECT_EQ("", details.message());
+        EXPECT_EQ(1, count_);
+
+        // Signal that the query has completed.
+        unique_lock<mutex> lock(mutex_);
+        query_complete_ = true;
+        cond_.notify_one();
+    }
+
+    virtual void info(OperationInfo const& op_info) override
+    {
+        /*EXPECT_EQ(OperationInfo::PoorInternet, op_info.code());
+        EXPECT_EQ("Partial results returned due to poor internet connection.", op_info.message());*/
+    }
+
+    void wait_until_finished()
+    {
+        unique_lock<mutex> lock(mutex_);
+        cond_.wait(lock, [this] { return this->query_complete_; });
+    }
+
+private:
+    bool query_complete_;
+    mutex mutex_;
+    condition_variable cond_;
+    atomic_int count_;
+};
+
+
 class PreviewReceiver : public PreviewListenerBase
 {
 public:
@@ -313,6 +366,22 @@ TEST(Runtime, search)
 
     auto receiver = make_shared<Receiver>();
     auto ctrl = scope->search("test", SearchMetadata("en", "phone"), receiver);
+    receiver->wait_until_finished();
+}
+
+TEST(Runtime, result_for_key)
+{
+    auto reg_rt = run_test_registry();
+
+    // connect to scope and run a query
+    auto rt = internal::RuntimeImpl::create("", "Runtime.ini");
+    auto mw = rt->factory()->create("TestScope", "Zmq", "Zmq.ini");
+    mw->start();
+    auto proxy = mw->create_scope_proxy("TestScope");
+    auto scope = internal::ScopeImpl::create(proxy, "TestScope");
+
+    auto receiver = make_shared<SingleResultReceiver>();
+    auto ctrl = scope->result_for_key("a_key", SearchMetadata("en", "phone"), receiver);
     receiver->wait_until_finished();
 }
 

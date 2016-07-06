@@ -50,6 +50,18 @@ public:
 
     virtual void run(SearchReplyProxy const& reply) override
     {
+        // request for single result
+        if (!query().result_key().empty())
+        {
+            auto cat = reply->register_category("cat1", "Category 1", "");
+            CategorisedResult res(cat);
+            res.set_uri("uri");
+            res.set_title("title (result by key)");
+            reply->push(res);
+
+            return;
+        }
+
         // pushing invalid departments (current departnent not present in the tree) should throw
         {
             Department::SPtr parent = Department::create("unknown1", query_, "All departments");
@@ -127,6 +139,12 @@ public:
 };
 
 SearchQueryBase::UPtr TestScope::search(CannedQuery const& query, SearchMetadata const& metadata)
+{
+    return SearchQueryBase::UPtr(new TestQuery(query, metadata));
+}
+
+
+SearchQueryBase::UPtr TestScope::result_for_key(CannedQuery const& query, SearchMetadata const& metadata)
 {
     return SearchQueryBase::UPtr(new TestQuery(query, metadata));
 }

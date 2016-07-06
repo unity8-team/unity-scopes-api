@@ -158,9 +158,13 @@ MWQueryCtrlProxy ScopeObject::search(CannedQuery const& q,
                  info.mw,
                  "search",
                  [&q, &hints, &context, this]() -> SearchQueryBase::UPtr {
-                 SearchQueryBase::UPtr search_query;
+                      SearchQueryBase::UPtr search_query;
                       search_query = q.result_key().empty() ? this->scope_base_->search(q, hints)
                                                           : this->scope_base_->result_for_key(q, hints);
+                      if (!search_query)
+                      {
+                          return nullptr;
+                      }
                       search_query->set_department_id(q.department_id());
 
                       auto sqb = dynamic_cast<SearchQueryBaseImpl*>(search_query->fwd());

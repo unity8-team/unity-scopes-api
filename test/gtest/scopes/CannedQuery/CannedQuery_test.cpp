@@ -89,6 +89,19 @@ TEST(CannedQuery, copy)
         EXPECT_TRUE(b.has_user_data());
         EXPECT_EQ(1, b.user_data().get_int());
     }
+    {
+        CannedQuery a("scope-A");
+        a.set_result_key("foo");
+        CannedQuery b("scope-B");
+        b = a;
+
+        EXPECT_EQ(a.scope_id(), b.scope_id());
+        EXPECT_EQ(a.result_key(), b.result_key());
+        EXPECT_EQ(a.query_string(), b.query_string());
+        a.set_result_key("bar");
+
+        EXPECT_EQ("foo", b.result_key());
+    }
 }
 
 TEST(CannedQuery, move)
@@ -165,6 +178,11 @@ TEST(CannedQuery, to_uri)
             // filters is {"f1":["o1"]}
             EXPECT_EQ("scope://scopeA?q=foo&dep=dep1&filters=%7B%22f1%22%3A%5B%22o1%22%5D%7D%0A", q.to_uri());
         }
+    }
+    {
+        CannedQuery q("scope-A");
+        q.set_result_key("1234");
+        EXPECT_EQ("scope://scope-A?rkey=1234", q.to_uri());
     }
 }
 
@@ -299,21 +317,39 @@ TEST(CannedQuery, from_uri)
         EXPECT_EQ("Foo bar", q.query_string());
         EXPECT_EQ("a bc", q.department_id());
     }
+    {
+
+        auto q = CannedQuery::from_uri("scope://scope-A?rkey=1234");
+        EXPECT_EQ("scope-A", q.scope_id());
+        EXPECT_EQ("1234", q.result_key());
+        EXPECT_EQ("", q.query_string());
+        EXPECT_EQ("", q.department_id());
+        EXPECT_FALSE(q.filter_state().has_filters());
+    }
 }
 
 TEST(CannedQuery, serialize)
 {
-    CannedQuery q("scope-A");
-    q.set_query_string("foo");
-    q.set_department_id("dep1");
-    q.set_user_data(Variant("x"));
+    {
+        CannedQuery q("scope-A");
+        q.set_query_string("foo");
+        q.set_department_id("dep1");
+        q.set_user_data(Variant("x"));
 
-    auto var = q.serialize();
-    EXPECT_EQ("scope-A", var["scope"].get_string());
-    EXPECT_EQ("dep1", var["department_id"].get_string());
-    EXPECT_EQ("foo", var["query_string"].get_string());
-    EXPECT_EQ("x", var["user_data"].get_string());
-    EXPECT_TRUE(var.find("filter_state") != var.end());
+        auto var = q.serialize();
+        EXPECT_EQ("scope-A", var["scope"].get_string());
+        EXPECT_EQ("dep1", var["department_id"].get_string());
+        EXPECT_EQ("foo", var["query_string"].get_string());
+        EXPECT_EQ("x", var["user_data"].get_string());
+        EXPECT_TRUE(var.find("filter_state") != var.end());
+    }
+    {
+        CannedQuery q("scope-A");
+        q.set_result_key("foo");
+        auto var = q.serialize();
+        EXPECT_EQ("scope-A", var["scope"].get_string());
+        EXPECT_EQ("foo", var["result_key"].get_string());
+    }
 }
 
 TEST(CannedQuery, deserialize)
@@ -331,6 +367,15 @@ TEST(CannedQuery, deserialize)
         EXPECT_EQ("foo", q.query_string());
         EXPECT_EQ("dep1", q.department_id());
         EXPECT_EQ(133, q.user_data().get_int());
+    }
+    {
+        VariantMap vm;
+        vm["scope"] = "scope-A";
+        vm["result_key"] = "foo";
+
+        auto q = internal::CannedQueryImpl::create(vm);
+        EXPECT_EQ("scope-A", q.scope_id());
+        EXPECT_EQ("foo", q.result_key());
     }
 }
 
