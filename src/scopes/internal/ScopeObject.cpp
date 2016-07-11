@@ -159,8 +159,24 @@ MWQueryCtrlProxy ScopeObject::search(CannedQuery const& q,
                  "search",
                  [&q, &hints, &context, this]() -> SearchQueryBase::UPtr {
                       SearchQueryBase::UPtr search_query;
-                      search_query = q.result_key().empty() ? this->scope_base_->search(q, hints)
-                                                          : this->scope_base_->result_for_key(q, hints);
+                      if (q.result_key().empty())
+                      {
+                          search_query = this->scope_base_->search(q, hints);
+                      }
+                      else
+                      {
+                         if (hints.cardinality() == 1)
+                         {
+                            search_query = this->scope_base_->result_for_key(q, hints);
+                         }
+                         else
+                         {
+                            // force cardinality of 1
+                            auto new_hints = hints;
+                            new_hints.set_cardinality(1);
+                            search_query = this->scope_base_->result_for_key(q, new_hints);
+                         }
+                      }
                       if (!search_query)
                       {
                           return nullptr;

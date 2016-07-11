@@ -175,7 +175,7 @@ public:
     {
     }
 
-    virtual void push(Department::SCPtr const& parent) override
+    virtual void push(Department::SCPtr const&) override
     {
         FAIL();
     }
@@ -197,12 +197,6 @@ public:
         unique_lock<mutex> lock(mutex_);
         query_complete_ = true;
         cond_.notify_one();
-    }
-
-    virtual void info(OperationInfo const& op_info) override
-    {
-        /*EXPECT_EQ(OperationInfo::PoorInternet, op_info.code());
-        EXPECT_EQ("Partial results returned due to poor internet connection.", op_info.message());*/
     }
 
     void wait_until_finished()
@@ -381,7 +375,8 @@ TEST(Runtime, result_for_key)
     auto scope = internal::ScopeImpl::create(proxy, "TestScope");
 
     auto receiver = make_shared<SingleResultReceiver>();
-    auto ctrl = scope->result_for_key("a_key", SearchMetadata("en", "phone"), receiver);
+    // the cardinality of 50 will be re-set by the middleware to 1
+    auto ctrl = scope->result_for_key("a_key", SearchMetadata(50, "en", "phone"), receiver);
     receiver->wait_until_finished();
 }
 

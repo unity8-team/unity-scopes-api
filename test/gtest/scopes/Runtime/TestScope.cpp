@@ -53,6 +53,7 @@ public:
         // request for single result
         if (!query().result_key().empty())
         {
+            EXPECT_EQ(1, search_metadata().cardinality());
             auto cat = reply->register_category("cat1", "Category 1", "");
             CategorisedResult res(cat);
             res.set_uri("uri");
