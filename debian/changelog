@@ -1,3 +1,11 @@
+unity-scopes-api (1.0.6+16.10.20160831.2-0ubuntu1) yakkety; urgency=medium
+
+  [ Pawel Stolowski ]
+  * Disable the failing SmartScopesClient_test on arm64 until we
+    understand what's going wrong (created bug #1615004 for it).
+
+ -- Robert Bruce Park <robert.park@canonical.com>  Wed, 31 Aug 2016 22:19:52 +0000
+
 unity-scopes-api (1.0.6+16.10.20160617-0ubuntu1) yakkety; urgency=medium
 
   [ Marcus Tomlinson ]
