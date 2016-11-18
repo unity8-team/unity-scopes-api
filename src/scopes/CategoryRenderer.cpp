@@ -67,6 +67,8 @@ When using <tt>{"schema-version": 1}</tt>, the following keys are understood:
 \arg \c card-size Size of the result cards; possible values: \c "small", \c "medium" (default), \c "large"; when using <tt>"category-layout": "vertical-journal"</tt> any integer between 12 and 38
 \arg \c overlay Overlay text data on top of the art; boolean, default false
 \arg \c collapsed-rows Number of result rows displayed while the category is collapsed; possible values: any non-negative integer, where 0 fully expands the category (only affects grid)
+\arg \c expandable Specifies if category should be expandable when collapsed-rows value is other than 0. It's \c true by default. If set to \c false and \c collapsed-rows is non-zero, then "Show more" button
+will not be displayed, the category will be fully expanded and limited to the specified number of rows with as many results as fit displayed (excess results will be dropped).
 \arg \c card-background Background color for the cards; string; URI in the format \verbatim color:///#rrggbb \endverbatim or \verbatim color:///color_name
 \endverbatim or \verbatim gradient:///#rrggbb/#rrggbb \endverbatim or an image URI (will be stretched)
 \arg \c quick-preview-type The type of media content represented by result cards, for use with inline playback; the only currently supported type is "audio".
