@@ -14,7 +14,6 @@ endif()
 
 include(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("#ifdef __clang__\n#else\n#error \"Not clang.\"\n#endif\nint main(int argc, char **argv) { return 0; }" IS_CLANG)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 if(IS_CLANG)
   message(STATUS "Compiling with Clang, disabling lttng.")
@@ -290,7 +289,7 @@ if(cmake_build_type_lower MATCHES coverage)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage -g")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage -g")
 endif()
-include(EnableCoverageReport)
+find_package(CoverageReport)
 
 # Tests
 include(CTest)
