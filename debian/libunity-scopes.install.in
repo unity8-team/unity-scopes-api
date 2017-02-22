@@ -1,8 +1,6 @@
 var/lib/libunity-scopes/version
 usr/lib/*/libunity-scopes.so.*
 usr/lib/*/unity-scopes
-usr/lib/*/unity-scopes/scoperegistry
-usr/lib/*/unity-scopes/scoperunner
-usr/lib/*/unity-scopes/smartscopesproxy
-usr/share/upstart/sessions/*.conf
-usr/share/apport/package-hooks/*.py
+usr/lib/systemd
+usr/share/upstart
+usr/share/apport
