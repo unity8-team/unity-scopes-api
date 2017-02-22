@@ -1,0 +1,7 @@
+[Unit]
+Description=Smart scopes proxy
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=$SNAP/@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_LIBDIR@/@UNITY_SCOPES_LIB@/smartscopesproxy upstart
+Restart=on-failure

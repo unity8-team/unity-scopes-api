@@ -14,6 +14,23 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/smart-scopes-proxy.conf DESTINATION ${
 configure_file(scope-registry.conf.in scope-registry.conf @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/scope-registry.conf DESTINATION ${CMAKE_INSTALL_DATADIR}/upstart/sessions)
 
+# systemd config for smart scopes proxy
+configure_file(smart-scopes-proxy.service.in smart-scopes-proxy.service @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/smart-scopes-proxy.service DESTINATION lib/systemd/user)
+
+# systemd config for scope registry
+configure_file(scope-registry.service.in scope-registry.service @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/scope-registry.service DESTINATION lib/systemd/user)
+
+# transitional upstart override files to avoid running twice when upstart runs under systemd
+install(
+  FILES
+    smart-scopes-proxy.override
+    scope-registry.override
+  DESTINATION
+    ${CMAKE_INSTALL_DATADIR}/upstart/systemd-session/upstart
+)
+
 # apport package hook
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libunity-scopes.py libunity-scopes${UNITY_SCOPES_SOVERSION}.py COPYONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libunity-scopes${UNITY_SCOPES_SOVERSION}.py
